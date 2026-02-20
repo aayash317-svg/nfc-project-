@@ -71,12 +71,14 @@ export async function updateSession(request: NextRequest) {
             // Patients might view their own portal but nothing else? 
             // Actually, if patient tries to go to /hospital/login or whatever.
 
-            // Login Redirects (Prevent logged-in users from seeing login pages)
+            // Login Redirects (Disabled to allow role switching during demo)
+            /*
             if (path.startsWith("/login")) {
                 if (role === 'patient') return NextResponse.redirect(new URL("/patient", request.url)); // Corrected path
                 if (role === 'hospital') return NextResponse.redirect(new URL("/hospital", request.url));
                 if (role === 'insurance') return NextResponse.redirect(new URL("/insurance", request.url));
             }
+            */
 
             // Verification Gates (DISABLED FOR EXPO DEMO)
             /* 

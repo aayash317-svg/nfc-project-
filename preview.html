@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NFC Health Identity - Expo Preview</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&family=Space+Grotesk:wght@500;700&display=swap');
+
+        :root {
+            --bg: #1E2761;
+            --primary: #CADCFC;
+            --secondary: #FFFFFF;
+            --accent: #06B6D4;
+            --danger: #F43F5E;
+            --text: #FFFFFF;
+            --muted: rgba(202, 220, 252, 0.7);
+            --glass: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            margin: 0;
+            background: #0F172A;
+            color: var(--text);
+            font-family: 'Outfit', sans-serif;
+            scroll-behavior: smooth;
+        }
+
+        .slide-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px 0;
+            gap: 60px;
+        }
+
+        .slide {
+            width: 900px;
+            height: 506px;
+            /* 16:9 */
+            background: var(--bg);
+            position: relative;
+            overflow: hidden;
+            border-radius: 12px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--glass-border);
+            display: flex;
+            flex-direction: column;
+            padding: 40px;
+            box-sizing: border-box;
+        }
+
+        .slide::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 8px;
+            background: var(--primary);
+        }
+
+        .header {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 32px;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin: 0;
+        }
+
+        .subtitle {
+            font-size: 14px;
+            color: var(--muted);
+            font-style: italic;
+            margin-top: 8px;
+        }
+
+        .content {
+            margin-top: 40px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .title-slide {
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .title-slide .header {
+            font-size: 54px;
+            color: var(--primary);
+        }
+
+        .title-slide .main-sub {
+            font-size: 18px;
+            margin-top: 20px;
+            font-weight: 600;
+        }
+
+        .divider-slide {
+            background: var(--accent);
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .divider-slide::before {
+            display: none;
+        }
+
+        .divider-slide .header {
+            color: var(--bg);
+            font-size: 60px;
+        }
+
+        .glass-card {
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px;
+        }
+
+        .grid-4 {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+        }
+
+        .stat {
+            font-size: 80px;
+            font-family: 'Space Grotesk', sans-serif;
+            color: var(--accent);
+            font-weight: 700;
+            line-height: 1;
+        }
+
+        .danger-card {
+            border-color: var(--danger);
+            background: rgba(244, 63, 94, 0.05);
+        }
+
+        .danger-text {
+            color: #FFBBBB;
+            font-family: 'Space Grotesk', sans-serif;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .footer {
+            position: absolute;
+            bottom: 20px;
+            right: 40px;
+            font-size: 11px;
+            color: var(--muted);
+        }
+
+        .nav {
+            position: fixed;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 100;
+        }
+
+        .nav a {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--muted);
+            transition: all 0.3s;
+        }
+
+        .nav a:hover,
+        .nav a.active {
+            background: var(--accent);
+            transform: scale(1.5);
+        }
+
+        .code-block {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 14px;
+            color: var(--primary);
+            line-height: 1.4;
+        }
+
+        .journey-step {
+            background: var(--accent);
+            color: var(--bg);
+            padding: 20px;
+            text-align: center;
+            font-weight: 700;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="nav" id="sidebar-nav"></div>
+
+    <div class="slide-container">
+        <!-- Slide 1 -->
+        <div class="slide title-slide" id="slide-1">
+            <h1 class="header">NFC Health Identity Ecosystem</h1>
+            <p class="main-sub">MASTERING DIGITAL MEDICAL RECORDS</p>
+            <div class="footer">Project Expo 2026 Master Edition</div>
+        </div>
+
+        <!-- Slide 2 -->
+        <div class="slide" id="slide-2">
+            <h2 class="header">Executive Overview</h2>
+            <p class="subtitle">A new paradigm in digital health infrastructure</p>
+            <div class="content grid-2">
+                <div class="glass-card" style="font-size: 20px; line-height: 1.6;">
+                    The NFC Health ID System is a disruptive healthcare platform that synchronizes patient identities
+                    across insurance providers and hospitals. By combining hardware security with cloud-native
+                    persistence, we've created a failsafe clinical environment.
+                </div>
+                <div class="glass-card"
+                    style="border-color: var(--accent); display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                    <div class="stat">100%</div>
+                    <div style="font-weight: 700; margin-top: 10px;">DATA INTEGRITY</div>
+                </div>
+            </div>
+            <div class="footer">ENTERPRISE READY V1.0</div>
+        </div>
+
+        <!-- Slide 3 -->
+        <div class="slide divider-slide" id="slide-3">
+            <h2 class="header">THE HEALTHCARE CRISIS</h2>
+        </div>
+
+        <!-- Slide 4 -->
+        <div class="slide" id="slide-4">
+            <h2 class="header">Data Silos</h2>
+            <p class="subtitle">Why legacy systems are failing patients</p>
+            <div class="content grid-4">
+                <div class="glass-card danger-card">
+                    <p class="danger-text">Disconnected Databases</p>
+                </div>
+                <div class="glass-card danger-card">
+                    <p class="danger-text">Paper-Heavy Workflows</p>
+                </div>
+                <div class="glass-card danger-card">
+                    <p class="danger-text">Manual Retrieval Lag</p>
+                </div>
+                <div class="glass-card danger-card">
+                    <p class="danger-text">Unauthorized Access</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 5 -->
+        <div class="slide" id="slide-5">
+            <h2 class="header">Identity Vulnerability</h2>
+            <p class="subtitle">Unverified access leads to medical error</p>
+            <div class="content grid-2">
+                <div class="glass-card danger-card" style="font-size: 20px;">
+                    Current identification methods rely on unreliable oral history or unencrypted physical cards. This
+                    leads to misdiagnosis and critical delays in emergency situations.
+                </div>
+                <div class="glass-card"
+                    style="display: flex; align-items: center; justify-content: center; opacity: 0.5;">
+                    <div class="header" style="color: var(--text);">[CRITICAL RISK IMAGE]</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 6 -->
+        <div class="slide" id="slide-6">
+            <h2 class="header">Intake Lag</h2>
+            <p class="subtitle">The cost of inefficient data retrieval</p>
+            <div class="content" style="display: flex; align-items: center; gap: 40px;">
+                <div class="stat" style="font-size: 180px; color: var(--danger);">90%</div>
+                <div>
+                    <div class="header" style="font-size: 48px; color: white;">OF TRIAGE TIME</div>
+                    <p style="font-size: 22px; color: var(--muted);">is currently wasted searching for baseline medical
+                        information.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 7 -->
+        <div class="slide divider-slide" id="slide-7">
+            <h2 class="header">THE NFC INNOVATION</h2>
+        </div>
+
+        <!-- Slide 8 -->
+        <div class="slide" id="slide-8" style="justify-content: center; align-items: center; text-align: center;">
+            <p style="font-size: 36px; line-height: 1.4; color: var(--accent); font-style: italic; max-width: 800px;">
+                “Our system ensures that every patient carries their clinical history not in a folder, but in their
+                identity—encrypted, accessible, and life-saving.”
+            </p>
+            <p class="header" style="font-size: 18px; margin-top: 40px;">- NFC Health Systems Engineering Team</p>
+        </div>
+
+        <!-- Slide 9 -->
+        <div class="slide" id="slide-9">
+            <h2 class="header">Hardware Security</h2>
+            <p class="subtitle">Cryptographic NTAG215 Integrity</p>
+            <div class="content grid-3">
+                <div class="glass-card" style="text-align: center;">
+                    <h3 class="header" style="font-size: 20px; margin-bottom: 15px;">Physical Key</h3>
+                    <p style="font-size: 14px;">Requires physical proximity for secure check-in.</p>
+                </div>
+                <div class="glass-card" style="text-align: center;">
+                    <h3 class="header" style="font-size: 20px; margin-bottom: 15px;">Tamper Proof</h3>
+                    <p style="font-size: 14px;">Write-locked identity segments for absolute trust.</p>
+                </div>
+                <div class="glass-card" style="text-align: center;">
+                    <h3 class="header" style="font-size: 20px; margin-bottom: 15px;">72KB Storage</h3>
+                    <p style="font-size: 14px;">Optimized for high-speed cloud pointer retrieval.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 10 -->
+        <div class="slide" id="slide-10">
+            <h2 class="header">Failsafe Recovery</h2>
+            <p class="subtitle">Smart QR Metadata Architecture</p>
+            <div class="content glass-card grid-2" style="margin-top: 20px;">
+                <div class="code-block">
+                    {<br>
+                    &nbsp;&nbsp;"pid": "UUID-8892",<br>
+                    &nbsp;&nbsp;"blood": "O-",<br>
+                    &nbsp;&nbsp;"all": ["Penicillin", "Peanuts"],<br>
+                    &nbsp;&nbsp;"contact": "+91-XXXXX"<br>
+                    }
+                </div>
+                <div style="display: flex; align-items: center; font-size: 18px;">
+                    Offline-first triaging enabled by proprietary metadata embedding.
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 11 -->
+        <div class="slide divider-slide" id="slide-11">
+            <h2 class="header">THE PORTAL ECOSYSTEM</h2>
+        </div>
+
+        <!-- Slide 12 -->
+        <div class="slide" id="slide-12">
+            <h2 class="header">Patient Empowerment</h2>
+            <p class="subtitle">Mobile-first Next.js Dashboard</p>
+            <div class="content" style="gap: 20px;">
+                <div style="display: flex; gap: 20px; align-items: center;">
+                    <span style="font-size: 32px;">📱</span>
+                    <p><strong>Digital Identity Management:</strong> Generate and manage your Master QR and NFC pairing.
+                    </p>
+                </div>
+                <div style="display: flex; gap: 20px; align-items: center;">
+                    <span style="font-size: 32px;">📱</span>
+                    <p><strong>Global Record Visibility:</strong> Access every clinical note and history entry from your
+                        palm.</p>
+                </div>
+                <div style="display: flex; gap: 20px; align-items: center;">
+                    <span style="font-size: 32px;">📱</span>
+                    <p><strong>Insurance Oversight:</strong> Monitor policy coverage and claim status in real-time.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 13 -->
+        <div class="slide" id="slide-13">
+            <h2 class="header">Hospital Command</h2>
+            <p class="subtitle">Fast-track clinical intake for ERs</p>
+            <div class="content" style="justify-content: center;">
+                <div class="glass-card" style="text-align: center; border-color: var(--accent);">
+                    <h3 class="header" style="font-size: 32px; color: var(--accent);">INSTANT NFC SCANNING • TRIAGE VIEW
+                        • RECORD SIGNING</h3>
+                </div>
+            </div>
+            <p class="subtitle" style="text-align: center;">Optimized for zero-fatigue high-speed clinical intake.</p>
+        </div>
+
+        <!-- Slide 14 -->
+        <div class="slide" id="slide-14">
+            <h2 class="header">Insurance Operations</h2>
+            <p class="subtitle">Data-driven underwriting & trust</p>
+            <div class="content" style="justify-content: center; align-items: center; text-align: center;">
+                <p style="font-size: 24px; max-width: 700px; line-height: 1.6;">
+                    Ensure that claims are backed by immutable hospital records, reducing fraud and processing overhead.
+                </p>
+                <h3 class="header" style="font-size: 48px; margin-top: 40px;">TRUSTED • VERIFIED • FAST</h3>
+            </div>
+        </div>
+
+        <!-- Slide 15 -->
+        <div class="slide" id="slide-15">
+            <h2 class="header">Hybrid Persistence</h2>
+            <p class="subtitle">The SQLite & Supabase Sync Engine</p>
+            <div class="content grid-3" style="margin-top: 40px;">
+                <div class="glass-card" style="text-align: center; border-color: var(--accent);">
+                    <p class="header" style="font-size: 16px;">LOCAL SQLITE</p>
+                    <p style="font-size: 12px; margin-top: 10px;">Instant offline writes</p>
+                </div>
+                <div class="glass-card" style="text-align: center; border-color: var(--accent);">
+                    <p class="header" style="font-size: 16px;">SUPABASE</p>
+                    <p style="font-size: 12px; margin-top: 10px;">Global persistence</p>
+                </div>
+                <div class="glass-card" style="text-align: center; border-color: var(--accent);">
+                    <p class="header" style="font-size: 16px;">SYNC ENGINE</p>
+                    <p style="font-size: 12px; margin-top: 10px;">Background bridge</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 16 -->
+        <div class="slide" id="slide-16">
+            <h2 class="header">Infinite Security</h2>
+            <p class="subtitle">Multi-layer protection for clinical data</p>
+            <div class="content glass-card" style="gap: 30px;">
+                <h3 class="header" style="font-size: 24px; color: var(--accent);">AES-256 Payload Encryption</h3>
+                <h3 class="header" style="font-size: 24px; color: var(--accent);">PostgreSQL Row-Level Security</h3>
+                <h3 class="header" style="font-size: 24px; color: var(--accent);">Server-to-Server Service Role Gates
+                </h3>
+            </div>
+        </div>
+
+        <!-- Slide 17 -->
+        <div class="slide" id="slide-17">
+            <h2 class="header">Life Cycle</h2>
+            <p class="subtitle">From emergency scan to clinical entry</p>
+            <div class="content grid-4" style="margin-top: 40px;">
+                <div class="journey-step">1. NFC Scan</div>
+                <div class="journey-step">2. ID Verification</div>
+                <div class="journey-step">3. Data Retrieval</div>
+                <div class="journey-step">4. Record Entry</div>
+            </div>
+        </div>
+
+        <!-- Slide 18 -->
+        <div class="slide divider-slide" id="slide-18">
+            <h2 class="header">IMPACT & FUTURE</h2>
+        </div>
+
+        <!-- Slide 19 -->
+        <div class="slide" id="slide-19">
+            <h2 class="header">Digital Transformation</h2>
+            <p class="subtitle">Old Workflows vs. NFC Health System</p>
+            <div class="content grid-2">
+                <div class="glass-card danger-card">
+                    <p style="font-size: 18px;"><strong>OLD:</strong> Manual lookup, paper charts, oral history errors.
+                    </p>
+                </div>
+                <div class="glass-card" style="background: var(--primary); color: var(--bg);">
+                    <p style="font-size: 18px;"><strong>NEW:</strong>
+                        <1s scan, verified digital history, automated sync.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 20 -->
+        <div class="slide" id="slide-20">
+            <h2 class="header">Fiscal Impact</h2>
+            <p class="subtitle">Reducing overhead through automation</p>
+            <div class="content" style="display: flex; gap: 40px; align-items: center;">
+                <div class="stat" style="font-size: 120px;">$</div>
+                <p style="font-size: 24px;">Significant cost reductions across clinical onboarding and insurance
+                    administration.</p>
+            </div>
+        </div>
+
+        <!-- Slide 21 -->
+        <div class="slide" id="slide-21">
+            <h2 class="header">National Scaling</h2>
+            <p class="subtitle">Architecture designed for millions</p>
+            <div class="content grid-4" style="margin-top: 40px;">
+                <div class="glass-card" style="text-align: center;">
+                    <p class="header" style="font-size: 14px;">Stateless APIs</p>
+                </div>
+                <div class="glass-card" style="text-align: center;">
+                    <p class="header" style="font-size: 14px;">Partitioning</p>
+                </div>
+                <div class="glass-card" style="text-align: center;">
+                    <p class="header" style="font-size: 14px;">Edge Caching</p>
+                </div>
+                <div class="glass-card" style="text-align: center;">
+                    <p class="header" style="font-size: 14px;">Scalable DB</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 22 -->
+        <div class="slide" id="slide-22">
+            <h2 class="header">Development Roadmap</h2>
+            <p class="subtitle">Phase 1 & 2: Launch & Expansion</p>
+            <div class="content" style="justify-content: center;">
+                <p class="header" style="font-size: 28px; line-height: 1.8;">
+                    2025: Local Pilot Launch in Urban Centers<br>
+                    2026: Regional Insurance Hub Integration
+                </p>
+            </div>
+        </div>
+
+        <!-- Slide 23 -->
+        <div class="slide" id="slide-23">
+            <h2 class="header">Intelligence Roadmap</h2>
+            <p class="subtitle">Phase 3 & 4: AI & Global Scale</p>
+            <div class="content" style="justify-content: center;">
+                <p class="header" style="font-size: 28px; line-height: 1.8; color: var(--accent);">
+                    2027: AI-Driven Predictive Diagnostics<br>
+                    2028: Global Health Passporting
+                </p>
+            </div>
+        </div>
+
+        <!-- Slide 24 -->
+        <div class="slide" id="slide-24" style="background: #000; justify-content: center; align-items: center;">
+            <h2 class="header" style="font-size: 80px;">QUESTIONS?</h2>
+        </div>
+
+        <!-- Slide 25 -->
+        <div class="slide title-slide" id="slide-25">
+            <h1 class="header">NFC Health Identity</h1>
+            <p class="main-sub">THE FUTURE OF MEDICAL CARE IS HERE.</p>
+            <div class="footer">Presented by NFC Health Systems | Project Expo 2026</div>
+        </div>
+    </div>
+
+    <script>
+        const nav = document.getElementById('sidebar-nav');
+        const slides = document.querySelectorAll('.slide');
+
+        slides.forEach((_, i) => {
+            const a = document.createElement('a');
+            a.href = '#slide-' + (i + 1);
+            a.title = 'Slide ' + (i + 1);
+            nav.appendChild(a);
+        });
+
+        window.addEventListener('scroll', () => {
+            let current = '';
+            slides.forEach(slide => {
+                const top = slide.offsetTop - 100;
+                if (pageYOffset >= top) {
+                    current = slide.getAttribute('id');
+                }
+            });
+
+            document.querySelectorAll('.nav a').forEach(a => {
+                a.classList.remove('active');
+                if (a.getAttribute('href').includes(current)) {
+                    a.classList.add('active');
+                }
+            });
+        });
+    </script>
+
+</body>
+
+</html>

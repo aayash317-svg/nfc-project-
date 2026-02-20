@@ -1,0 +1,23 @@
+# Dependencies
+node_modules
+.next
+.venv
+__pycache__
+env/
+venv/
+.env
+.env.local
+
+# Build outputs
+dist/
+build/
+*.pyc
+
+# IDEs
+.vscode/
+.idea/
+.DS_Store
+
+# Presentation files (Optional: keep if you want them in git)
+# *.pptx
+# preview.html
