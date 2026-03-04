@@ -31,15 +31,15 @@ export async function updatePatientProfile(formData: FormData) {
 
         if (profileError) throw profileError;
 
-        // 2. Update Patients table
+        // 2. Upsert Patients table (use upsert in case the record doesn't exist yet)
         const { error: patientError } = await supabase
             .from('patients')
-            .update({
+            .upsert({
+                id: user.id, // required for upsert
                 dob: dob || null,
                 blood_group: bloodGroup,
                 emergency_contact: emergencyContact
-            })
-            .eq('id', user.id);
+            });
 
         if (patientError) throw patientError;
 
@@ -72,8 +72,28 @@ export async function getPatientProfile() {
             )
         `)
         .eq('id', user.id)
-        .single();
+        .maybeSingle();
 
     if (error) return { error: error.message };
+
+    // If patient record doesn't exist yet, we still return the basic profile info from users
+    if (!data) {
+        const { data: profile } = await supabase
+            .from('profiles')
+            .select('full_name, email, phone')
+            .eq('id', user.id)
+            .single();
+
+        return {
+            data: {
+                profiles: profile,
+                // Add empty defaults for fields the form expects
+                dob: null,
+                blood_group: null,
+                emergency_contact: null
+            }
+        };
+    }
+
     return { data };
 }
