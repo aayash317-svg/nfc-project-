@@ -361,3 +361,50 @@ export async function getInsuranceTrends() {
 
     return { trends, isSimulated: false };
 }
+
+export async function getInsuranceProfile() {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { error: "Unauthorized" };
+
+    const { data: profile, error } = await supabase
+        .from('profiles')
+        .select(`
+            *,
+            insurance_providers (*)
+        `)
+        .eq('id', user.id)
+        .single();
+
+    if (error) return { error: error.message };
+    return { profile };
+}
+
+export async function updateInsuranceProfile(formData: FormData) {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { error: "Unauthorized" };
+
+    const full_name = formData.get("full_name") as string;
+    const phone = formData.get("phone") as string;
+    const company_name = formData.get("company_name") as string;
+
+    // Update profile
+    const { error: profileError } = await supabase
+        .from('profiles')
+        .update({ full_name, phone })
+        .eq('id', user.id);
+
+    if (profileError) return { error: profileError.message };
+
+    // Update insurance provider record
+    const { error: providerError } = await supabase
+        .from('insurance_providers')
+        .update({ company_name })
+        .eq('id', user.id);
+
+    if (providerError) return { error: providerError.message };
+
+    revalidatePath('/insurance/settings/profile');
+    return { success: true };
+}

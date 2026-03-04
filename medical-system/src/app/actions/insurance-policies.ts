@@ -39,10 +39,12 @@ export async function createPolicy(prevState: any, formData: FormData) {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return { error: "Unauthorized" };
 
-    const patientEmail = formData.get("patientEmail") as string;
+    const patientEmail = (formData.get("patientEmail") as string)?.trim().toLowerCase();
     const policyNumber = formData.get("policyNumber") as string;
     const coverageAmount = formData.get("coverageAmount") as string;
     const validUntil = formData.get("validUntil") as string;
+
+    if (!patientEmail) return { error: "Patient email is required." };
 
     // 1. Find Patient by Email
     const { data: patientProfile, error: profileError } = await supabase
