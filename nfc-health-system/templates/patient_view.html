@@ -18,17 +18,101 @@
                 recordsContainer.innerHTML = '<tr><td colspan="4" class="text-center" style="padding: 40px; color: var(--text-muted); opacity: 0.5;">No medical records found for this patient.</td></tr>';
             } else {
                 records.forEach(record => {
+                    let displayData = record.data_payload;
+                    let attachmentHtml = '';
+
+                    if (displayData.includes('[IMAGE_ATTACHMENT]')) {
+                        const parts = displayData.split('[NOTES]');
+                        const imgData = parts[0].replace('[IMAGE_ATTACHMENT]', '').trim();
+                        const notes = parts[1] ? parts[1].trim() : '';
+
+                        attachmentHtml = `<div style="margin-top: 10px;"><img src="${imgData}" style="max-width: 100%; max-height: 200px; border-radius: 8px; border: 1px solid var(--glass-border); cursor: pointer;" onclick="window.open('${imgData}')"></div>`;
+                        displayData = notes;
+                    } else if (displayData.includes('[PDF_ATTACHMENT]')) {
+                        const parts = displayData.split('[NOTES]');
+                        const pdfData = parts[0].replace('[PDF_ATTACHMENT]', '').trim();
+                        const notes = parts[1] ? parts[1].trim() : '';
+
+                        attachmentHtml = `
+                            <div style="margin-top: 10px;">
+                                <a href="${pdfData}" download="medical_report.pdf" class="btn-primary" style="display: inline-flex; align-items: center; gap: 8px; padding: 8px 16px; font-size: 0.8rem; background: rgba(16, 185, 129, 0.2); border: 1px solid #10b981; color: #10b981;">
+                                    <span>📄</span> Download PDF Report
+                                </a>
+                            </div>`;
+                        displayData = notes;
+                    } else if (displayData.includes('[PRESCRIPTION_DATA]')) {
+                        // Extract image if exists
+                        let prescImgHtml = '';
+                        if (displayData.includes('[PRESC_IMAGE]')) {
+                            const imgData = displayData.split('[PRESC_IMAGE]')[1].trim();
+                            prescImgHtml = `<div style="margin-top: 10px;"><img src="${imgData}" style="max-width: 100%; max-height: 180px; border-radius: 8px; border: 1px solid rgba(245,158,11,0.4); cursor: pointer;" onclick="window.open('${imgData}')"><div style="font-size: 0.7rem; color: #f59e0b; margin-top: 4px;">Physical Prescription Image</div></div>`;
+                            displayData = displayData.split('[PRESC_IMAGE]')[0];
+                        }
+
+                        const parts = displayData.split('[NOTES]');
+                        const prescLines = parts[0].replace('[PRESCRIPTION_DATA]', '').trim().split('\n');
+                        const notes = parts[1] ? parts[1].trim() : '';
+
+                        let prescHtml = '';
+                        prescLines.forEach(line => {
+                            if (line.trim()) prescHtml += `<div style="margin-bottom: 4px;"><strong>${line.replace(': ', ':</strong> ')}</div>`;
+                        });
+
+                        attachmentHtml = `
+                            <div style="margin-top: 15px; padding: 16px; background: rgba(245, 158, 11, 0.05); border: 1px solid rgba(245, 158, 11, 0.2); border-radius: 12px;">
+                                <div style="color: #f59e0b; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px; font-weight: 700;">Active Prescription</div>
+                                <div style="color: var(--text-main); font-size: 0.9rem;">${prescHtml}</div>
+                                ${prescImgHtml}
+                            </div>`;
+                        displayData = notes;
+                    }
+
+                    // Special styling for Scan Results (Lab Data) or Prescriptions
+                    if (record.record_type.toLowerCase() === 'scan' || displayData.includes('--- LAB')) {
+                        let interpretationHtml = '';
+                        let labImgHtml = '';
+
+                        // Extract image if exists
+                        if (displayData.includes('[LAB_IMAGE_ATTACHMENT]')) {
+                            const imgData = displayData.split('[LAB_IMAGE_ATTACHMENT]')[1].split('[LAB_INTERPRETATION]')[0].trim();
+                            labImgHtml = `<div style="margin-top: 10px;"><img src="${imgData}" style="max-width: 100%; max-height: 200px; border-radius: 8px; border: 1px solid rgba(139,92,246,0.4); cursor: pointer;" onclick="window.open('${imgData}')"><div style="font-size: 0.7rem; color: #8b5cf6; margin-top: 4px;">Physical Lab Report Image</div></div>`;
+                            displayData = displayData.split('[LAB_IMAGE_ATTACHMENT]')[0] + (displayData.includes('[LAB_INTERPRETATION]') ? '[LAB_INTERPRETATION]' + displayData.split('[LAB_INTERPRETATION]')[1] : '');
+                        }
+
+                        if (displayData.includes('[LAB_INTERPRETATION]')) {
+                            const parts = displayData.split('[LAB_INTERPRETATION]');
+                            const rawData = parts[0].trim();
+                            const interpretation = parts[1].trim();
+
+                            interpretationHtml = `
+                                <div style="margin-top: 12px; padding: 12px; background: rgba(16, 185, 129, 0.05); border: 1px solid rgba(16, 185, 129, 0.2); border-radius: 8px;">
+                                    <div style="color: #10b981; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 4px; font-weight: 700;">Medical Interpretation</div>
+                                    <div style="color: var(--text-main); font-size: 0.85rem; line-height: 1.5;">${interpretation}</div>
+                                </div>`;
+                            displayData = rawData;
+                        }
+
+                        displayData = `<div style="font-family: 'Space Grotesk', monospace; background: rgba(0,0,0,0.2); padding: 12px; border-radius: 8px; border-left: 3px solid #8b5cf6; white-space: pre-line;">${displayData}</div>` + labImgHtml + interpretationHtml;
+                    } else if (record.record_type.toLowerCase() === 'prescription') {
+                        displayData = displayData || 'No additional notes provided.';
+                    }
+
                     const row = document.createElement('tr');
                     row.className = "record-row animate-in fade-in slide-in-from-bottom-2";
+
+                    const badgeType = record.record_type.toLowerCase();
+                    const badgeLabel = badgeType === 'scan' ? 'LAB RESULT' : record.record_type.toUpperCase();
+
                     row.innerHTML = `
                         <td style="color: var(--text-muted); font-size: 0.85rem;">${new Date(record.created_at).toLocaleString()}</td>
                         <td style="color: var(--primary); font-weight: 500;">${record.hospital_name}</td>
                         <td>
-                            <span class="badge badge-outline badge-${record.record_type.toLowerCase()}">${record.record_type.toUpperCase()}</span>
+                            <span class="badge badge-outline badge-${badgeType}">${badgeLabel}</span>
                         </td>
                         <td>
                             <div style="font-weight: 600; color: var(--text-main); margin-bottom: 2px;">${record.summary}</div>
-                            <div style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.4;">${record.data_payload}</div>
+                            <div style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.4;">${displayData}</div>
+                            ${attachmentHtml}
                         </td>
                     `;
                     recordsContainer.appendChild(row);
@@ -111,7 +195,7 @@
 {% endblock %}
 
 {% block content %}
-<div class="glass-panel" style="padding: 40px; margin-bottom: 40px;">
+<div class="glass-panel reveal" style="padding: 40px; margin-bottom: 40px;">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
         <div>
             <h1 class="text-gradient" style="margin: 0; font-size: 2.2rem;">{{ patient.full_name }}</h1>
@@ -129,7 +213,8 @@
     </div>
 
     <!-- Digital Identity Section -->
-    <div class="glass-panel identity-card" style="padding: 24px; margin-bottom: 30px; border-radius: 16px;">
+    <div class="glass-panel identity-card reveal delay-1"
+        style="padding: 24px; margin-bottom: 30px; border-radius: 16px;">
         <h3
             style="margin-bottom: 15px; color: var(--primary); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.1em;">
             Global Digital Identity</h3>
@@ -166,7 +251,7 @@
         </div>
     </div>
 
-    <div
+    <div class="reveal delay-2"
         style="background: rgba(244, 63, 94, 0.1); border: 1px solid rgba(244, 63, 94, 0.2); padding: 16px; border-radius: 12px; margin-bottom: 30px; display: flex; gap: 12px; align-items: center;">
         <span style="font-size: 1.2rem;">🛡️</span>
         <p style="margin: 0; color: #fb7185; font-size: 0.85rem; font-weight: 500;">
@@ -175,7 +260,7 @@
         </p>
     </div>
 
-    <div style="overflow-x: auto;">
+    <div class="reveal delay-3" style="overflow-x: auto;">
         <table>
             <thead>
                 <tr>

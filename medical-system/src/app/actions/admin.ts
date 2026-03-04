@@ -56,7 +56,7 @@ export async function createOrganization(data: {
         // 2. Ensure a profile exists and has the correct role
         const { data: profileData } = await supabase
             .from('profiles')
-            .select('id, role')
+            .select('id, role, full_name')
             .eq('id', userId)
             .single();
 
@@ -73,11 +73,11 @@ export async function createOrganization(data: {
                 });
 
             if (profileError) return { error: `Profile create error: ${profileError.message}` };
-        } else if (profileData.role !== targetRole) {
-            // Update role if it's different
+        } else if (profileData.role !== targetRole || profileData.full_name !== data.name) {
+            // Update role or name if different
             const { error: profileUpdateError } = await supabase
                 .from('profiles')
-                .update({ role: targetRole })
+                .update({ role: targetRole, full_name: data.name })
                 .eq('id', userId);
 
             if (profileUpdateError) return { error: `Profile update error: ${profileUpdateError.message}` };
@@ -122,5 +122,67 @@ export async function createOrganization(data: {
         };
     } catch (err: any) {
         return { error: err.message || 'Unknown error' };
+    }
+}
+export async function deleteOrganization(userId: string, orgType: 'hospital' | 'insurance') {
+    const supabase = createAdminClient();
+
+    try {
+        // 1. Delete organization-specific data
+        if (orgType === 'hospital') {
+            // Delete medical records first (dependent on hospital)
+            const { error: mrError } = await supabase
+                .from('medical_records')
+                .delete()
+                .eq('hospital_id', userId);
+
+            if (mrError) return { error: `Medical records delete error: ${mrError.message}` };
+
+            const { error: hError } = await supabase
+                .from('hospitals')
+                .delete()
+                .eq('id', userId);
+
+            if (hError) return { error: `Hospital delete error: ${hError.message}` };
+        } else {
+            // Insurance: Delete claims first
+            const { error: cError } = await supabase
+                .from('claims')
+                .delete()
+                .eq('provider_id', userId);
+
+            if (cError) return { error: `Claims delete error: ${cError.message}` };
+
+            // Delete policies
+            const { error: pError_ins } = await supabase
+                .from('insurance_policies')
+                .delete()
+                .eq('provider_id', userId);
+
+            if (pError_ins) return { error: `Insurance policies delete error: ${pError_ins.message}` };
+
+            const { error: iError } = await supabase
+                .from('insurance_providers')
+                .delete()
+                .eq('id', userId);
+
+            if (iError) return { error: `Insurance delete error: ${iError.message}` };
+        }
+
+        // 2. Delete from profiles
+        const { error: pError } = await supabase
+            .from('profiles')
+            .delete()
+            .eq('id', userId);
+
+        if (pError) return { error: `Profile delete error: ${pError.message}` };
+
+        // 3. Delete from Auth (CRITICAL)
+        const { error: authError } = await supabase.auth.admin.deleteUser(userId);
+        if (authError) return { error: `Auth delete error: ${authError.message}` };
+
+        return { success: true };
+    } catch (err: any) {
+        return { error: err.message || 'Unknown error during deletion' };
     }
 }

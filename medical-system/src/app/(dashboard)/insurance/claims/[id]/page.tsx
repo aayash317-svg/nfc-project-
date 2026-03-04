@@ -32,8 +32,8 @@ export default async function ClaimDetailPage({ params }: { params: { id: string
                     <p className="text-slate-500 text-sm">ID: {claim.id}</p>
                 </div>
                 <div className={`px-3 py-1 rounded-full text-sm font-semibold capitalize ${claim.status === 'approved' ? 'bg-green-100 text-green-700' :
-                        claim.status === 'rejected' ? 'bg-red-100 text-red-700' :
-                            'bg-yellow-100 text-yellow-700'
+                    claim.status === 'rejected' ? 'bg-red-100 text-red-700' :
+                        'bg-yellow-100 text-yellow-700'
                     }`}>
                     {claim.status}
                 </div>
@@ -83,11 +83,11 @@ export default async function ClaimDetailPage({ params }: { params: { id: string
                             </div>
                             <div>
                                 <label className="text-xs text-slate-500 uppercase font-bold">Max Coverage</label>
-                                <p className="text-slate-900 font-semibold">${Number(policy?.coverage_amount).toLocaleString()}</p>
+                                <p className="text-slate-900 font-semibold">${Number(policy?.coverage_amount).toFixed(2)}</p>
                             </div>
                             <div>
                                 <label className="text-xs text-slate-500 uppercase font-bold">Valid Until</label>
-                                <p className="text-slate-900">{new Date(policy?.valid_until).toLocaleDateString()}</p>
+                                <p className="text-slate-900">{policy?.valid_until ? new Date(policy.valid_until).toISOString().split('T')[0] : 'N/A'}</p>
                             </div>
                         </div>
                     </div>
@@ -101,7 +101,7 @@ export default async function ClaimDetailPage({ params }: { params: { id: string
                         <div className="space-y-4">
                             <div>
                                 <label className="text-xs text-slate-500 uppercase font-bold">Claim Amount</label>
-                                <p className="text-2xl font-bold text-slate-900">${Number(claim.claim_amount).toLocaleString()}</p>
+                                <p className="text-2xl font-bold text-slate-900">${Number(claim.claim_amount).toFixed(2)}</p>
                             </div>
                             <div>
                                 <label className="text-xs text-slate-500 uppercase font-bold">Submission Notes</label>
@@ -113,7 +113,7 @@ export default async function ClaimDetailPage({ params }: { params: { id: string
                                 <label className="text-xs text-slate-500 uppercase font-bold">Submitted Date</label>
                                 <p className="text-slate-900 text-sm flex items-center gap-2">
                                     <Calendar className="h-3 w-3" />
-                                    {new Date(claim.submitted_at).toLocaleString()}
+                                    {new Date(claim.submitted_at).toISOString().split('T')[0]}
                                 </p>
                             </div>
                         </div>
@@ -129,7 +129,7 @@ export default async function ClaimDetailPage({ params }: { params: { id: string
                         <div className="bg-slate-50 rounded-xl border border-slate-200 p-6 text-center">
                             <h3 className="font-semibold text-slate-800 mb-2">Processed</h3>
                             <p className="text-slate-500 text-sm mb-4">
-                                This claim was {claim.status} on {claim.processed_at ? new Date(claim.processed_at).toLocaleDateString() : 'N/A'}.
+                                This claim was {claim.status} on {claim.processed_at ? new Date(claim.processed_at).toISOString().split('T')[0] : 'N/A'}.
                             </p>
                             {claim.notes && (
                                 <div className="text-left bg-white p-3 rounded border border-slate-200 text-xs">

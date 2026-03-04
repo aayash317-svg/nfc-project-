@@ -101,3 +101,43 @@ export async function addMedicalRecord(formData: FormData) {
     revalidatePath(`/hospital/patient/${patientId}`);
     return { success: true };
 }
+
+export async function getRecentScans() {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { error: "Unauthorized" };
+
+    // 1. Fetch nfc_scan actions by this hospital
+    const { data: logs, error: logsError } = await supabase
+        .from('audit_logs')
+        .select('*')
+        .eq('actor_id', user.id)
+        .eq('action', 'nfc_scan')
+        .order('timestamp', { ascending: false })
+        .limit(5);
+
+    if (logsError) return { error: logsError.message };
+    if (!logs || logs.length === 0) return { scans: [] };
+
+    // 2. Fetch profiles for these patients
+    const patientIds = logs.map(l => l.resource_id);
+    const { data: profiles, error: profilesError } = await supabase
+        .from('profiles')
+        .select('id, full_name, email')
+        .in('id', patientIds);
+
+    if (profilesError) return { error: profilesError.message };
+
+    const profilesMap = new Map(profiles.map(p => [p.id, p]));
+
+    // 3. Merge data
+    const scans = logs.map(log => ({
+        id: log.id,
+        patient_id: log.resource_id,
+        timestamp: log.timestamp,
+        patient_name: profilesMap.get(log.resource_id)?.full_name || log.details?.patient_name || "Unknown Patient",
+        patient_email: profilesMap.get(log.resource_id)?.email || "N/A"
+    }));
+
+    return { scans };
+}

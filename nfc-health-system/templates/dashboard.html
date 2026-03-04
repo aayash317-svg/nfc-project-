@@ -1,69 +1,150 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="glass-panel" style="padding: 2rem;">
-    <div style="border: 2px solid #000; padding: 1rem; margin-bottom: 3rem; background: #000; color: #fff;">
-        <h2 style="margin: 0; font-size: 1.5rem;">USER: {{ session.get('user_name', 'PARTNER')|upper }}</h2>
-        <div style="font-family: 'IBM Plex Mono'; font-size: 0.8rem; margin-top: 0.5rem; opacity: 0.8;">
-            ACCESS_LEVEL: AUTHORIZED | SESSION_ACTIVE
+<div class="dashboard-wrapper" style="padding: 1.5rem; max-width: 1200px; margin: 0 auto;">
+
+    <!-- Hero Header -->
+    <div class="glass-panel"
+        style="padding: 2rem; margin-bottom: 2.5rem; border-left: 4px solid var(--primary); display: flex; justify-content: space-between; align-items: center;">
+        <div>
+            <span
+                style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.15em; color: var(--primary); font-weight: 700;">Operational
+                Command Center</span>
+            <h1 class="text-gradient" style="font-size: 2.2rem; margin: 0.2rem 0 0 0;">{{ session.get('user_name',
+                'Apollo Hospital') }}</h1>
+            <p style="color: var(--text-muted); margin: 0.5rem 0 0 0; font-family: 'Space Grotesk'; font-size: 0.9rem;">
+                <span
+                    style="display: inline-block; width: 8px; height: 8px; background: #10b981; border-radius: 50%; margin-right: 0.5rem; box-shadow: 0 0 10px #10b981;"></span>
+                SECURE_ENCRYPTED_SESSION_ACTIVE
+            </p>
+        </div>
+        <div style="text-align: right; opacity: 0.7;">
+            <div style="font-size: 0.7rem; color: var(--text-muted);">SYSTEM STATUS</div>
+            <div style="font-weight: 700; color: var(--primary);">v2.4.0-STABLE</div>
         </div>
     </div>
 
+    <!-- Quick Actions Grid -->
     <div class="dashboard-grid"
-        style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem;">
-        <!-- Action Card 1 -->
-        <a href="{{ url_for('hospital_profile') }}" class="action-card">
-            <div style="font-size: 3rem; margin-bottom: 1rem;">🏥</div>
-            <h3>HOSPITAL_PROFILE</h3>
-            <p>VIEW_CREDENTIALS >> </p>
+        style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem;">
+
+        <!-- Hospital Profile Card -->
+        <a href="{{ url_for('hospital_profile') }}" class="glass-panel action-card"
+            style="padding: 2.5rem; text-align: center; position: relative; overflow: hidden; --card-color: var(--primary);">
+            <div class="card-glow"></div>
+            <div class="icon-box" style="margin-bottom: 1.5rem;">
+                <span style="font-size: 3.5rem; filter: drop-shadow(0 0 15px var(--primary-glow));">🏥</span>
+            </div>
+            <h3 style="font-size: 1.4rem; margin-bottom: 0.5rem;">Hospital Profile</h3>
+            <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem;">Manage credentials, verified
+                status, and institutional data.</p>
+            <div class="action-btn">
+                VIEW_CREDENTIALS <span style="margin-left: 0.5rem;">→</span>
+            </div>
         </a>
 
-        <!-- Action Card 2 -->
-        <a href="{{ url_for('patient_access') }}" class="action-card">
-            <div style="font-size: 3rem; margin-bottom: 1rem;">🧬</div>
-            <h3>PATIENT_ACCESS</h3>
-            <p>INITIATE_SCAN_SEQUENCE >> </p>
+        <!-- Patient Access Card -->
+        <a href="{{ url_for('patient_access') }}" class="glass-panel action-card"
+            style="padding: 2.5rem; text-align: center; position: relative; overflow: hidden; --card-color: var(--secondary);">
+            <div class="card-glow"></div>
+            <div class="icon-box" style="margin-bottom: 1.5rem;">
+                <span style="font-size: 3.5rem; filter: drop-shadow(0 0 15px var(--secondary-glow));">🧬</span>
+            </div>
+            <h3 style="font-size: 1.4rem; margin-bottom: 0.5rem;">Patient Access</h3>
+            <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem;">Scan identity tags or search
+                records via NFC signature.</p>
+            <div class="action-btn" style="--btn-color: var(--secondary);">
+                INITIATE_SEQUENCE <span style="margin-left: 0.5rem;">→</span>
+            </div>
         </a>
 
-        <!-- Action Card 3 -->
-        <a href="{{ url_for('settings') }}" class="action-card">
-            <div style="font-size: 3rem; margin-bottom: 1rem;">⚙️</div>
-            <h3>sys_config</h3>
-            <p>EDIT_SETTINGS >> </p>
+        <!-- Settings Card -->
+        <a href="{{ url_for('settings') }}" class="glass-panel action-card"
+            style="padding: 2.5rem; text-align: center; position: relative; overflow: hidden; --card-color: var(--accent);">
+            <div class="card-glow"></div>
+            <div class="icon-box" style="margin-bottom: 1.5rem;">
+                <span style="font-size: 3.5rem; filter: drop-shadow(0 0 15px rgba(244, 63, 94, 0.4));">⚙️</span>
+            </div>
+            <h3 style="font-size: 1.4rem; margin-bottom: 0.5rem;">System Config</h3>
+            <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem;">Configure API endpoints,
+                security keys, and local nodes.</p>
+            <div class="action-btn" style="--btn-color: var(--accent);">
+                EDIT_SETTINGS <span style="margin-left: 0.5rem;">→</span>
+            </div>
         </a>
+
     </div>
 </div>
 
 <style>
     .action-card {
-        border: 2px solid #000;
-        padding: 2rem;
-        display: block;
-        text-decoration: none;
-        color: #000;
-        transition: all 0.1s;
-        background: #fff;
+        transition: all 0.4s var(--ease-out);
+        border: 1px solid var(--glass-border);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
     }
 
     .action-card:hover {
-        background: #000;
-        color: #fff;
-        transform: translate(-4px, -4px);
-        box-shadow: 8px 8px 0px #ccc;
+        transform: translateY(-8px) scale(1.02);
+        border-color: var(--card-color);
+        box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.5), 0 0 20px -5px var(--card-color);
+        background: rgba(30, 41, 59, 0.7);
+    }
+
+    .card-glow {
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, var(--card-color) 0%, transparent 60%);
+        opacity: 0;
+        transition: opacity 0.4s;
+        z-index: 0;
+        pointer-events: none;
+    }
+
+    .action-card:hover .card-glow {
+        opacity: 0.05;
+    }
+
+    .icon-box {
+        transition: transform 0.4s var(--ease-out);
+    }
+
+    .action-card:hover .icon-box {
+        transform: scale(1.1) rotate(5deg);
+    }
+
+    .action-btn {
+        padding: 0.6rem 1.2rem;
+        border-radius: 20px;
+        background: rgba(255, 255, 255, 0.05);
+        color: var(--btn-color, var(--primary));
+        font-family: 'Space Grotesk';
+        font-weight: 700;
+        font-size: 0.8rem;
+        letter-spacing: 0.05em;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        transition: all 0.3s;
+    }
+
+    .action-card:hover .action-btn {
+        background: var(--btn-color, var(--primary));
+        color: white;
+        box-shadow: 0 0 15px var(--btn-color, var(--primary-glow));
     }
 
     .action-card h3 {
-        margin: 0 0 0.5rem 0;
-        text-decoration: underline;
-        text-decoration-thickness: 2px;
+        color: var(--text-main);
+        transition: color 0.3s;
     }
 
     .action-card:hover h3 {
-        color: #fff;
-    }
-
-    .action-card:hover p {
-        color: #ccc;
+        color: var(--btn-color, var(--primary));
     }
 </style>
 {% endblock %}

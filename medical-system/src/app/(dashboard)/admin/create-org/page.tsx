@@ -53,21 +53,25 @@ export default function AdminCreateOrg() {
             <h1 className="text-3xl font-bold text-foreground">Organization Management</h1>
 
             <div className="glass p-8">
-                <div className="flex gap-4 mb-8">
-                    <button
-                        onClick={() => { setOrgType('hospital'); setFormData(prev => ({ ...prev, generatedId: '', generatedPassword: '' })); }}
-                        className={`flex-1 py-4 rounded-xl border font-bold flex items-center justify-center gap-2 transition-all ${orgType === 'hospital' ? 'bg-primary/20 border-primary text-primary' : 'bg-black/20 border-transparent text-muted-foreground hover:bg-black/40'}`}
-                    >
-                        <Building2 className="h-5 w-5" />
-                        Hospital
-                    </button>
-                    <button
-                        onClick={() => { setOrgType('insurance'); setFormData(prev => ({ ...prev, generatedId: '', generatedPassword: '' })); }}
-                        className={`flex-1 py-4 rounded-xl border font-bold flex items-center justify-center gap-2 transition-all ${orgType === 'insurance' ? 'bg-secondary/20 border-secondary text-secondary' : 'bg-black/20 border-transparent text-muted-foreground hover:bg-black/40'}`}
-                    >
-                        <ShieldCheck className="h-5 w-5" />
-                        Insurance Provider
-                    </button>
+                <div className="space-y-2 mb-8">
+                    <label className="text-sm font-medium text-muted-foreground">Select Organization Type</label>
+                    <div className="relative">
+                        <select
+                            value={orgType}
+                            onChange={(e) => {
+                                setOrgType(e.target.value as 'hospital' | 'insurance');
+                                setFormData(prev => ({ ...prev, generatedId: '', generatedPassword: '' }));
+                            }}
+                            className="w-full h-14 rounded-xl bg-black/40 border border-white/10 px-4 pr-10 text-foreground appearance-none focus:ring-2 focus:ring-primary focus:outline-none transition-all cursor-pointer font-bold"
+                        >
+                            <option value="hospital" className="bg-[#0a0a0a]">🏥 Hospital Node</option>
+                            <option value="insurance" className="bg-[#0a0a0a]">🛡️ Insurance Provider</option>
+                        </select>
+                        <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground flex items-center gap-2">
+                            <div className="h-4 w-px bg-white/10 mx-2" />
+                            {orgType === 'hospital' ? <Building2 className="h-5 w-5 text-primary" /> : <ShieldCheck className="h-5 w-5 text-secondary" />}
+                        </div>
+                    </div>
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-6">

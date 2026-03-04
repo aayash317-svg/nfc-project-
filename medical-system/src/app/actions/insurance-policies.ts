@@ -9,19 +9,29 @@ export async function getProviderPolicies() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return { error: "Unauthorized" };
 
-    const { data, error } = await supabase
+    const { data: policies, error } = await supabase
         .from('insurance_policies')
-        .select(`
-            *,
-            patients (
-                profiles ( full_name, email )
-            )
-        `)
+        .select('*')
         .eq('provider_id', user.id)
         .order('created_at', { ascending: false });
 
     if (error) return { error: error.message };
-    return { policies: data };
+
+    // Attach patient data manually to avoid ambiguous relationship error
+    const patientIds = Array.from(new Set(policies.map(p => p.patient_id).filter(Boolean)));
+    if (patientIds.length === 0) return { policies };
+
+    const { data: profiles } = await supabase.from('profiles').select('id, full_name, email').in('id', patientIds);
+    const profilesMap = new Map(profiles?.map((p: any) => [p.id, p]) || []);
+
+    const policiesWithProfiles = policies.map(p => ({
+        ...p,
+        patients: {
+            profiles: profilesMap.get(p.patient_id) || null
+        }
+    }));
+
+    return { policies: policiesWithProfiles };
 }
 
 export async function createPolicy(prevState: any, formData: FormData) {
@@ -72,16 +82,12 @@ export async function seedSamplePolicies() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return { error: "Unauthorized" };
 
-    // Create a dummy patient if needed, or find one
-    // Ideally we assume at least one patient exists, or we create a placeholder
-    // For simplicity, we'll try to find any patient
     const { data: patients } = await supabase.from('profiles').select('id, email').eq('role', 'patient').limit(1);
 
     let patientId;
     if (patients && patients.length > 0) {
         patientId = patients[0].id;
     } else {
-        // Fallback or error
         return { error: "No patients found to assign policies to. Please create a patient account first." };
     }
 
@@ -98,6 +104,24 @@ export async function seedSamplePolicies() {
             ...sample
         });
     }
+
+    revalidatePath('/insurance/policies');
+    revalidatePath('/insurance');
+    return { success: true };
+}
+
+export async function deletePolicy(policyId: string) {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { error: "Unauthorized" };
+
+    const { error } = await supabase
+        .from('insurance_policies')
+        .delete()
+        .eq('id', policyId)
+        .eq('provider_id', user.id);
+
+    if (error) return { error: error.message };
 
     revalidatePath('/insurance/policies');
     revalidatePath('/insurance');

@@ -1,15 +1,25 @@
 'use client';
 
-import { useState } from "react";
-import { ClipboardList, Plus, Search, UserCheck, Users, ArrowRight } from "lucide-react";
+import { useState, useEffect } from "react";
+import { ClipboardList, Plus, Search, UserCheck, Users, ArrowRight, History, Zap } from "lucide-react";
 import Link from "next/link";
-import { searchPatients } from "@/app/actions/hospital";
+import { searchPatients, getRecentScans } from "@/app/actions/hospital";
 import { Profile } from "@/types";
-
 export default function HospitalDashboard() {
     const [query, setQuery] = useState("");
     const [results, setResults] = useState<Profile[]>([]);
     const [searching, setSearching] = useState(false);
+    const [scans, setScans] = useState<any[]>([]);
+    const [loadingScans, setLoadingScans] = useState(true);
+
+    useEffect(() => {
+        async function loadScans() {
+            const { scans: recentScans } = await getRecentScans();
+            setScans(recentScans || []);
+            setLoadingScans(false);
+        }
+        loadScans();
+    }, []);
 
     async function handleSearch(e: React.FormEvent) {
         e.preventDefault();
@@ -76,7 +86,7 @@ export default function HospitalDashboard() {
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-border">
-                                {results.map(p => (
+                                {results.map((p: Profile) => (
                                     <tr key={p.id} className="hover:bg-muted/30">
                                         <td className="px-4 py-3 font-medium">{p.full_name}</td>
                                         <td className="px-4 py-3 text-muted-foreground">{p.email}</td>
@@ -93,8 +103,60 @@ export default function HospitalDashboard() {
                 )}
             </div>
 
-            <div className="bg-muted/10 border border-border/50 rounded-xl p-6 text-center text-sm text-muted-foreground">
-                <p>Use the NFC Scanner to securely access patient records.</p>
+            {/* Recent Scans Section */}
+            <div className="bg-card border border-border overflow-hidden rounded-2xl shadow-sm">
+                <div className="px-8 py-6 border-b border-border flex items-center justify-between bg-muted/20">
+                    <h2 className="text-xl font-semibold flex items-center gap-2">
+                        <History className="h-5 w-5 text-blue-500" />
+                        Recently Scanned Patients
+                    </h2>
+                    <div className="flex items-center gap-2 px-3 py-1 bg-blue-500/10 rounded-full">
+                        <Zap className="h-3 w-3 text-blue-400 animate-pulse" />
+                        <span className="text-[10px] font-bold text-blue-400 uppercase tracking-wider">Live Scans</span>
+                    </div>
+                </div>
+
+                <div className="p-0">
+                    {loadingScans ? (
+                        <div className="p-12 text-center text-muted-foreground animate-pulse">
+                            Loading recent activity...
+                        </div>
+                    ) : scans.length > 0 ? (
+                        <div className="divide-y divide-border">
+                            {scans.map((scan: any) => (
+                                <div key={scan.id} className="flex items-center justify-between p-6 hover:bg-muted/30 transition-colors group">
+                                    <div className="flex items-center gap-4">
+                                        <div className="h-10 w-10 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-500 font-bold">
+                                            {scan.patient_name.charAt(0)}
+                                        </div>
+                                        <div>
+                                            <h3 className="font-bold text-foreground group-hover:text-blue-500 transition-colors">{scan.patient_name}</h3>
+                                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                                <span>{scan.patient_email}</span>
+                                                <span className="h-1 w-1 rounded-full bg-border" />
+                                                <span>{new Date(scan.timestamp).toLocaleString()}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <Link
+                                        href={`/hospital/patient/${scan.patient_id}`}
+                                        className="px-4 py-2 bg-secondary hover:bg-secondary/80 text-secondary-foreground rounded-lg text-xs font-bold transition-all opacity-0 group-hover:opacity-100 flex items-center gap-2"
+                                    >
+                                        View Records <ArrowRight className="h-3 w-3" />
+                                    </Link>
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="p-12 text-center text-muted-foreground">
+                            <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center mx-auto mb-4 opacity-50">
+                                <Search className="h-6 w-6" />
+                            </div>
+                            <p className="font-medium text-foreground/60 mb-1">No recent scans found</p>
+                            <p className="text-xs">Use the NFC Scanner to securely access patient records.</p>
+                        </div>
+                    )}
+                </div>
             </div>
         </div>
     )

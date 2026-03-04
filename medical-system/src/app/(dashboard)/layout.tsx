@@ -3,6 +3,7 @@ import {
     History,
     LayoutDashboard,
     LogOut,
+    Plus,
     Settings,
     Shield,
     User,
@@ -11,6 +12,7 @@ import {
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { SidebarNav } from "@/components/dashboard/sidebar-nav";
+import { HeaderTitle } from "@/components/dashboard/header-title";
 
 export default async function DashboardLayout({
     children,
@@ -22,7 +24,7 @@ export default async function DashboardLayout({
 
     // Default to patient links if unknown, but normally middleware protects this
     let role = 'patient';
-    let sidebarLinks = [];
+    let sidebarLinks: any[] = [];
 
     if (user) {
         const { data: profile } = await supabase
@@ -34,21 +36,18 @@ export default async function DashboardLayout({
     }
 
     // Dynamic Links Configuration
-    // Dynamic Links Configuration
     if (role === 'hospital') {
         sidebarLinks = [
             { href: "/hospital", label: "Patient Search", icon: <Search className="h-5 w-5" /> },
             { href: "http://127.0.0.1:5000/scan", label: "NFC Scanner", icon: <LayoutDashboard className="h-5 w-5" />, external: true },
         ];
     } else if (role === 'insurance') {
-        sidebarLinks = [
-            { href: "/insurance", label: "Dashboard", icon: <LayoutDashboard className="h-5 w-5" /> },
-            { href: "/insurance/register-patient", label: "Register Patient", icon: <User className="h-5 w-5" /> },
-            { href: "/insurance/claims", label: "Claims Processing", icon: <FileText className="h-5 w-5" /> },
-        ];
+        // Insurance Portal has its own self-contained layout
+        return <div className="min-h-screen bg-[#0a0e1a]">{children}</div>;
     } else if (role === 'admin' || role === 'service_role') {
         sidebarLinks = [
-            { href: "/admin/create-org", label: "Manage Orgs", icon: <Shield className="h-5 w-5" /> },
+            { href: "/admin", label: "Admin Console", icon: <LayoutDashboard className="h-5 w-5" /> },
+            { href: "/admin/create-org", label: "Register Org", icon: <Plus className="h-5 w-5" /> },
         ];
     } else {
         // Patient (Default)
@@ -85,9 +84,9 @@ export default async function DashboardLayout({
             {/* Main Content */}
             <main className="flex-1 flex flex-col">
                 <header className="h-16 bg-card border-b border-border/50 flex items-center justify-between px-6 sticky top-0 z-10 backdrop-blur-sm bg-card/80">
-                    <h2 className="font-semibold text-lg capitalize">{role} Portal</h2>
+                    <HeaderTitle role={role} />
                     <div className="flex items-center gap-4">
-                        <div className="h-8 w-8 rounded-full bg-indigo-100 border border-indigo-200 flex items-center justify-center text-indigo-700 font-bold text-xs uppercase">
+                        <div className="h-8 w-8 rounded-full bg-indigo-100 border border-indigo-200 flex items-center justify-center text-indigo-700 font-bold text-xs uppercase shadow-sm">
                             {role.slice(0, 2)}
                         </div>
                     </div>

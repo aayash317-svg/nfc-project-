@@ -2,6 +2,7 @@ from flask import Blueprint, request, jsonify, session, g
 from database import query_db, execute_db
 from utils import hash_password, verify_password, generate_uuid
 import datetime
+from supabase_client import get_supabase_client
 
 bp = Blueprint('api', __name__, url_prefix='/api')
 
@@ -36,7 +37,6 @@ def register():
 
     except Exception as e:
         return jsonify({'error': f'Registration Error: {str(e)}'}), 500
-
 @bp.route('/auth/login', methods=['POST'])
 def login():
     data = request.get_json()
@@ -72,8 +72,87 @@ def login():
         if role == 'admin': redirect_url = '/admin/dashboard'
         
         return jsonify({'message': 'Login successful', 'redirect': redirect_url, 'role': role}), 200
-    else:
-        return jsonify({'error': 'Invalid Credentials'}), 401
+    
+    # --- FALLBACK: Try Supabase ---
+    print(f"DEBUG: Attempting Supabase fallback for {identifier}")
+    try:
+        supabase = get_supabase_client()
+        resolved_email = None
+        user_data = None
+        s_role = None
+
+        # Try Hospital lookup in Supabase
+        print(f"DEBUG: Searching for hospital with license {identifier}")
+        h_resp = supabase.table('hospitals').select('id, license_number, profiles(email, full_name)').eq('license_number', identifier).execute()
+        if h_resp.data:
+            user_data = h_resp.data[0]
+            resolved_email = user_data['profiles']['email']
+            s_role = 'hospital'
+            print(f"DEBUG: Found hospital, resolved email: {resolved_email}")
+        
+        if not resolved_email:
+            print(f"DEBUG: Searching for insurance provider with name {identifier}")
+            i_resp = supabase.table('insurance_providers').select('id, company_name, profiles(email, full_name)').eq('company_name', identifier).execute()
+            if i_resp.data:
+                user_data = i_resp.data[0]
+                resolved_email = user_data['profiles']['email']
+                s_role = 'insurance'
+                print(f"DEBUG: Found insurance, resolved email: {resolved_email}")
+            else:
+                print(f"DEBUG: Searching profiles for direct email match: {identifier}")
+                p_resp = supabase.table('profiles').select('email, full_name, role').eq('email', identifier).execute()
+                if p_resp.data:
+                    user_data = p_resp.data[0]
+                    resolved_email = identifier
+                    s_role = user_data['role']
+                    print(f"DEBUG: Found profile with role {s_role}")
+
+        if resolved_email:
+            print(f"DEBUG: Attempting Supabase sign-in for {resolved_email}")
+            try:
+                auth_resp = supabase.auth.sign_in_with_password({"email": resolved_email, "password": password})
+                if auth_resp.user:
+                    # 3. Success! Sync to SQLite
+                    new_id = auth_resp.user.id
+                    print(f"DEBUG: Supabase auth successful for {new_id}")
+                    
+                    name = user_data.get('profiles', {}).get('full_name') or user_data.get('full_name') or "Synced User"
+                    # Capture the actual ID from user_data if identifier was an email
+                    actual_council_id = user_data.get('license_number') or user_data.get('company_name') or identifier
+
+                    if s_role == 'hospital':
+                        print(f"DEBUG: Syncing hospital {actual_council_id} to SQLite")
+                        execute_db(
+                            "INSERT OR IGNORE INTO hospitals (id, name, council_id, email, password_hash) VALUES (?, ?, ?, ?, ?)",
+                            (new_id, name, actual_council_id, resolved_email, hash_password(password))
+                        )
+                    elif s_role == 'insurance':
+                        print(f"DEBUG: Syncing insurance {actual_council_id} to SQLite")
+                        execute_db(
+                            "INSERT OR IGNORE INTO insurance_companies (id, name, license_number, email, password_hash) VALUES (?, ?, ?, ?, ?)",
+                            (new_id, name, actual_council_id, resolved_email, hash_password(password))
+                        )
+
+                    session.clear()
+                    session['user_id'] = new_id
+                    session['user_name'] = name
+                    session['role'] = s_role
+                    
+                    redirect_url = '/dashboard'
+                    if s_role == 'insurance': redirect_url = '/insurance/policies'
+                    
+                    return jsonify({'message': 'Login successful (Synced)', 'redirect': redirect_url, 'role': s_role}), 200
+                else:
+                    print("DEBUG: Supabase auth failed (no user in response)")
+            except Exception as ae:
+                print(f"DEBUG: Supabase auth error: {ae}")
+
+    except Exception as e:
+        print(f"Supabase Auth Fallback Error: {e}")
+
+    return jsonify({'error': 'Invalid Credentials'}), 401
+
+
 
 # --- Patient Data ---
 
@@ -133,6 +212,20 @@ def scan_patient():
                 print(f"Auto-sync error: {e}")
 
         if patient:
+            # 5. Log Scan to Supabase Audit Logs (if hospital)
+            if session.get('role') == 'hospital':
+                try:
+                    supabase = get_supabase_client()
+                    supabase.table('audit_logs').insert({
+                        'actor_id': session['user_id'],
+                        'action': 'nfc_scan',
+                        'resource_type': 'patient',
+                        'resource_id': patient['id'],
+                        'details': {'patient_name': patient['full_name']}
+                    }).execute()
+                except Exception as le:
+                    print(f"Audit Log Error: {le}")
+
             return jsonify({
                 'patient_id': patient['id'], 
                 'redirect': f'/patient/{patient["id"]}/view'

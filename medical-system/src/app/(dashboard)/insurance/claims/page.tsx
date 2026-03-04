@@ -82,7 +82,7 @@ export default async function ClaimsPage({
                                             <td className="px-6 py-4">
                                                 <div className="font-medium text-slate-900 line-clamp-1" title={claim.id}>{claim.id}</div>
                                                 <div className="text-xs text-slate-400">
-                                                    {new Date(claim.submitted_at).toLocaleDateString()}
+                                                    {new Date(claim.submitted_at).toISOString().split('T')[0]}
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4">
@@ -96,7 +96,7 @@ export default async function ClaimsPage({
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4 font-semibold text-slate-900">
-                                                ${Number(claim.claim_amount).toLocaleString()}
+                                                ${Number(claim.claim_amount).toFixed(2)}
                                             </td>
                                             <td className="px-6 py-4">
                                                 {getStatusBadge(claim.status)}

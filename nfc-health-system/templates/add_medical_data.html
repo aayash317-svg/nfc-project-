@@ -5,7 +5,7 @@
     <div class="glass-panel" style="padding: 40px;">
         <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 30px;">
             <div
-                style="background: rgba(6, 182, 212, 0.1); p: 12px; border-radius: 12px; border: 1px solid var(--primary-glow);">
+                style="background: rgba(6, 182, 212, 0.1); padding: 12px; border-radius: 12px; border: 1px solid var(--primary-glow);">
                 <span style="font-size: 1.5rem;">📝</span>
             </div>
             <div>
@@ -35,7 +35,8 @@
                     <option value="text">Clinical Notes (Text)</option>
                     <option value="image">Image / X-Ray</option>
                     <option value="pdf">PDF Report</option>
-                    <option value="scan">Scan Results</option>
+                    <option value="scan">Lab Results</option>
+                    <option value="prescription">Prescription</option>
                 </select>
             </div>
 
@@ -43,6 +44,123 @@
                 <label for="summary">Clinical Summary / Title</label>
                 <input type="text" id="summary" name="summary" class="form-control"
                     placeholder="e.g. Annual physical checkup results" required>
+            </div>
+
+            <!-- Image Upload Section -->
+            <div id="image-upload-section"
+                style="display: none; margin-bottom: 25px; padding: 25px; background: rgba(255,255,255,0.03); border: 2px dashed var(--glass-border); border-radius: 16px; text-align: center;">
+                <label for="medical_image" style="display: block; cursor: pointer;">
+                    <span style="font-size: 2.5rem; display: block; margin-bottom: 12px;">🖼️</span>
+                    <span style="font-weight: 700; color: #06b6d4; letter-spacing: 1px;">UPLOAD MEDICAL IMAGE /
+                        X-RAY</span>
+                </label>
+                <input type="file" id="medical_image" accept="image/*" style="display: none;">
+                <div id="image-preview" style="display: none; margin-top: 20px;">
+                    <img id="preview-img" src=""
+                        style="max-width: 100%; max-height: 250px; border-radius: 12px; border: 1px solid var(--primary-glow); box-shadow: 0 0 20px rgba(6, 182, 212, 0.2);">
+                    <p id="image-name"
+                        style="font-size: 0.85rem; color: #06b6d4; margin-top: 10px; font-weight: 600; font-family: 'Space Grotesk';">
+                    </p>
+                </div>
+            </div>
+
+            <!-- PDF Upload Section -->
+            <div id="pdf-upload-section"
+                style="display: none; margin-bottom: 25px; padding: 25px; background: rgba(255,255,255,0.03); border: 2px dashed var(--glass-border); border-radius: 16px; text-align: center;">
+                <label for="medical_pdf" style="display: block; cursor: pointer;">
+                    <span style="font-size: 2.5rem; display: block; margin-bottom: 12px;">📄</span>
+                    <span style="font-weight: 700; color: #10b981; letter-spacing: 1px;">UPLOAD PDF REPORT</span>
+                </label>
+                <input type="file" id="medical_pdf" accept="application/pdf" style="display: none;">
+                <div id="pdf-info" style="display: none; margin-top: 20px;">
+                    <span style="font-size: 1.5rem;">✅</span>
+                    <p id="pdf-name"
+                        style="font-size: 0.85rem; color: #10b981; margin-top: 10px; font-weight: 600; font-family: 'Space Grotesk';">
+                    </p>
+                </div>
+            </div>
+
+            <!-- Simulated Lab System Section -->
+            <div id="scan-system-section"
+                style="display: none; margin-bottom: 25px; padding: 25px; background: rgba(139, 92, 246, 0.05); border: 1px solid rgba(139, 92, 246, 0.2); border-radius: 16px; text-align: center;">
+                <div
+                    style="font-size: 0.8rem; color: #8b5cf6; text-transform: uppercase; letter-spacing: 0.2em; margin-bottom: 15px; font-weight: 700;">
+                    Automated Lab Interface</div>
+                <button type="button" id="simulate-scan-btn" class="btn-primary"
+                    style="background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%); width: 100%; padding: 15px; border-radius: 12px;">
+                    <span style="margin-right: 10px;">🧪</span> GENERATE LAB RESULTS
+                </button>
+                <div id="scan-loading" style="display: none; margin-top: 15px;">
+                    <div class="animate-pulse" style="color: #8b5cf6; font-size: 0.9rem;">Analyzing samples & signing
+                        data...</div>
+                </div>
+
+                <div style="border-top: 1px solid rgba(139, 92, 246, 0.2); margin-top: 20px; padding-top: 20px;">
+                    <div
+                        style="font-size: 0.7rem; color: #8b5cf6; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 12px; font-weight: 700;">
+                        — OR ATTACH PHYSICAL LAB REPORT IMAGE —</div>
+                    <label for="lab-image"
+                        style="display: block; cursor: pointer; text-align: center; padding: 16px; border: 2px dashed rgba(139, 92, 246, 0.35); border-radius: 12px; transition: all 0.2s;">
+                        <span style="font-size: 2rem; display: block; margin-bottom: 8px;">🔬</span>
+                        <span style="color: #8b5cf6; font-weight: 600; font-size: 0.85rem;">Click or Drag to
+                            Upload</span>
+                    </label>
+                    <input type="file" id="lab-image" accept="image/*" style="display: none;">
+                    <div id="lab-img-preview" style="display: none; margin-top: 12px; text-align: center;">
+                        <img id="lab-preview-img" src=""
+                            style="max-width: 100%; max-height: 200px; border-radius: 10px; border: 1px solid rgba(139, 92, 246, 0.4); box-shadow: 0 0 16px rgba(139, 92, 246, 0.15);">
+                        <p id="lab-img-name"
+                            style="font-size: 0.8rem; color: #8b5cf6; margin-top: 8px; font-weight: 600;"></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Prescription Section -->
+            <div id="prescription-section"
+                style="display: none; margin-bottom: 25px; padding: 25px; background: rgba(245, 158, 11, 0.05); border: 1px solid rgba(245, 158, 11, 0.2); border-radius: 16px;">
+                <div
+                    style="font-size: 0.8rem; color: #f59e0b; text-transform: uppercase; letter-spacing: 0.2em; margin-bottom: 15px; font-weight: 700; text-align: center;">
+                    Digital Prescription Pad</div>
+                <div class="space-y-4">
+                    <div class="form-group">
+                        <label style="color: #f59e0b; font-size: 0.75rem;">Medication Name & Dosage</label>
+                        <input type="text" id="presc-med" class="form-control"
+                            style="border-color: rgba(245, 158, 11, 0.3);" placeholder="e.g. Amoxicillin 500mg">
+                    </div>
+                    <div class="form-group">
+                        <label style="color: #f59e0b; font-size: 0.75rem;">Frequency / Instructions</label>
+                        <input type="text" id="presc-freq" class="form-control"
+                            style="border-color: rgba(245, 158, 11, 0.3);" placeholder="e.g. Twice daily after meals">
+                    </div>
+                    <div class="form-group">
+                        <label style="color: #f59e0b; font-size: 0.75rem;">Duration</label>
+                        <input type="text" id="presc-dur" class="form-control"
+                            style="border-color: rgba(245, 158, 11, 0.3);" placeholder="e.g. 7 Days">
+                    </div>
+                    <button type="button" id="add-to-presc-btn" class="btn-primary"
+                        style="background: #f59e0b; width: 100%; padding: 10px; margin-top: 10px; font-size: 0.85rem;">
+                        Attach Fields to Record
+                    </button>
+
+                    <div style="border-top: 1px solid rgba(245, 158, 11, 0.2); margin-top: 20px; padding-top: 20px;">
+                        <div
+                            style="font-size: 0.7rem; color: #f59e0b; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 12px; font-weight: 700; text-align: center;">
+                            — OR ATTACH PHYSICAL PRESCRIPTION IMAGE —</div>
+                        <label for="presc-image"
+                            style="display: block; cursor: pointer; text-align: center; padding: 16px; border: 2px dashed rgba(245, 158, 11, 0.35); border-radius: 12px; transition: all 0.2s;">
+                            <span style="font-size: 2rem; display: block; margin-bottom: 8px;">📷</span>
+                            <span style="color: #f59e0b; font-weight: 600; font-size: 0.85rem;">Click or Drag to
+                                Upload</span>
+                        </label>
+                        <input type="file" id="presc-image" accept="image/*" style="display: none;">
+                        <div id="presc-img-preview" style="display: none; margin-top: 12px; text-align: center;">
+                            <img id="presc-preview-img" src=""
+                                style="max-width: 100%; max-height: 200px; border-radius: 10px; border: 1px solid rgba(245, 158, 11, 0.4); box-shadow: 0 0 16px rgba(245, 158, 11, 0.15);">
+                            <p id="presc-img-name"
+                                style="font-size: 0.8rem; color: #f59e0b; margin-top: 8px; font-weight: 600;"></p>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <div class="form-group">
@@ -67,4 +185,174 @@
         </form>
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const recordType = document.getElementById('record_type');
+        const imageSection = document.getElementById('image-upload-section');
+        const pdfSection = document.getElementById('pdf-upload-section');
+        const scanSection = document.getElementById('scan-system-section');
+        const prescSection = document.getElementById('prescription-section');
+
+        const imageInput = document.getElementById('medical_image');
+        const pdfInput = document.getElementById('medical_pdf');
+        const scanBtn = document.getElementById('simulate-scan-btn');
+        const addPrescBtn = document.getElementById('add-to-presc-btn');
+
+        const dataPayload = document.getElementById('data_payload');
+
+        const imagePreview = document.getElementById('image-preview');
+        const previewImg = document.getElementById('preview-img');
+        const imageNameLabel = document.getElementById('image-name');
+
+        const pdfInfo = document.getElementById('pdf-info');
+        const pdfNameLabel = document.getElementById('pdf-name');
+
+        const scanLoading = document.getElementById('scan-loading');
+
+        recordType.addEventListener('change', () => {
+            // Reset all
+            imageSection.style.display = 'none';
+            pdfSection.style.display = 'none';
+            scanSection.style.display = 'none';
+            prescSection.style.display = 'none';
+            dataPayload.placeholder = "Enter findings, symptoms, or file secure links...";
+
+            if (recordType.value === 'image') {
+                imageSection.style.display = 'block';
+            } else if (recordType.value === 'pdf') {
+                pdfSection.style.display = 'block';
+            } else if (recordType.value === 'scan') {
+                scanSection.style.display = 'block';
+            } else if (recordType.value === 'prescription') {
+                prescSection.style.display = 'block';
+                dataPayload.placeholder = "Medication details will be attached above...";
+            }
+        });
+
+        // Image Handler
+        imageInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                imageNameLabel.textContent = `Attached: ${file.name}`;
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    previewImg.src = ev.target.result;
+                    imagePreview.style.display = 'block';
+                    dataPayload.value = `[IMAGE_ATTACHMENT]\n${ev.target.result}\n\n[NOTES]\n` + (dataPayload.value.includes('[NOTES]') ? dataPayload.value.split('[NOTES]')[1] : '');
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // PDF Handler
+        pdfInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                pdfNameLabel.textContent = `Report Attached: ${file.name}`;
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    pdfInfo.style.display = 'block';
+                    dataPayload.value = `[PDF_ATTACHMENT]\n${ev.target.result}\n\n[NOTES]\n` + (dataPayload.value.includes('[NOTES]') ? dataPayload.value.split('[NOTES]')[1] : '');
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Lab Simulator
+        scanBtn.addEventListener('click', () => {
+            scanBtn.disabled = true;
+            scanLoading.style.display = 'block';
+
+            setTimeout(() => {
+                const reportID = Math.floor(Math.random() * 100000);
+                const rawData = `--- LAB REPORT #${reportID} ---\nHEMATOLOGY SCREENING\nWBC: 7.4 x10^9/L (NORMAL)\nRBC: 5.1 x10^12/L (NORMAL)\nHGB: 15.2 g/dL (NORMAL)\nPLT: 245 x10^9/L (NORMAL)\n--- DATA VERIFIED BY HOSPITAL ---`;
+
+                const interpretation = `[LAB_INTERPRETATION]\nYour laboratory results are excellent. All core parameters (White Cells, Red Cells, and Hemoglobin) are within optimal ranges, indicating a strong immune response and healthy oxygen transport throughout your body. No abnormalities were detected in this screening.`;
+
+                dataPayload.value = rawData + "\n\n" + interpretation;
+                scanLoading.style.display = 'none';
+                scanBtn.innerHTML = "✅ LAB RESULTS GENERATED";
+                scanBtn.style.background = "#10b981";
+            }, 1500);
+        });
+
+        // Lab Image Handler
+        const labImageInput = document.getElementById('lab-image');
+        const labImgPreview = document.getElementById('lab-img-preview');
+        const labPreviewImg = document.getElementById('lab-preview-img');
+        const labImgName = document.getElementById('lab-img-name');
+
+        if (labImageInput) {
+            labImageInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    labImgName.textContent = `Attached: ${file.name}`;
+                    const reader = new FileReader();
+                    reader.onload = (ev) => {
+                        labPreviewImg.src = ev.target.result;
+                        labImgPreview.style.display = 'block';
+
+                        // Append image marker and a base interpretation
+                        const imgMarker = `\n[LAB_IMAGE_ATTACHMENT]\n${ev.target.result}`;
+                        const summary = `\n\n[LAB_INTERPRETATION]\nPhysical lab report image attached. Clinical review of the uploaded document is required for definitive interpretation.`;
+
+                        if (!dataPayload.value.includes('[LAB_IMAGE_ATTACHMENT]')) {
+                            dataPayload.value = dataPayload.value + imgMarker + summary;
+                        }
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+
+        // Prescription Handler
+        addPrescBtn.addEventListener('click', () => {
+            const med = document.getElementById('presc-med').value;
+            const freq = document.getElementById('presc-freq').value;
+            const dur = document.getElementById('presc-dur').value;
+
+            if (!med || !freq || !dur) {
+                alert("Please fill in all prescription fields.");
+                return;
+            }
+
+            const existingNotes = dataPayload.value.includes('[PRESCRIPTION_DATA]') ? dataPayload.value.split('[NOTES]')[1] || '' : dataPayload.value;
+            const prescData = `[PRESCRIPTION_DATA]\nMedication: ${med}\nFrequency: ${freq}\nDuration: ${dur}\n\n[NOTES]\n${existingNotes}`;
+
+            dataPayload.value = prescData;
+            addPrescBtn.innerHTML = "✅ ATTACHED";
+            addPrescBtn.style.background = "#10b981";
+            setTimeout(() => {
+                addPrescBtn.innerHTML = "Attach to Record";
+                addPrescBtn.style.background = "#f59e0b";
+            }, 1500);
+        });
+
+        // Prescription Image Handler
+        const prescImageInput = document.getElementById('presc-image');
+        const prescImgPreview = document.getElementById('presc-img-preview');
+        const prescPreviewImg = document.getElementById('presc-preview-img');
+        const prescImgName = document.getElementById('presc-img-name');
+
+        if (prescImageInput) {
+            prescImageInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    prescImgName.textContent = `Attached: ${file.name}`;
+                    const reader = new FileReader();
+                    reader.onload = (ev) => {
+                        prescPreviewImg.src = ev.target.result;
+                        prescImgPreview.style.display = 'block';
+                        // Append image to existing data
+                        if (!dataPayload.value.includes('[PRESC_IMAGE]')) {
+                            dataPayload.value = dataPayload.value + `\n[PRESC_IMAGE]\n${ev.target.result}`;
+                        }
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+    });
+</script>
 {% endblock %}

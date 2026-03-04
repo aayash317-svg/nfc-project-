@@ -12,41 +12,43 @@ import {
     ArrowRight,
     Activity
 } from "lucide-react";
-import { createClient } from "@/lib/supabase/server";
+import { getInsuranceStats, getRecentClaims } from "@/app/actions/insurance";
+import { seedSamplePolicies } from "@/app/actions/insurance-policies";
 
 export default async function InsuranceDashboard() {
-    const supabase = await createClient();
+    const statsResult = await getInsuranceStats();
+    const claimsResult = await getRecentClaims();
+
+    if ('error' in statsResult) {
+        return <div className="p-8 text-red-400">Error loading dashboard: {statsResult.error}</div>;
+    }
+
+    const { activePolicies, pendingClaims, expiringSoon, totalPremium } = statsResult;
+    const claims = ('claims' in claimsResult ? claimsResult.claims : []) || [];
 
     const stats = [
-        { title: "Active Policies", value: "12,450", icon: Users, change: "+2.5%", up: true, color: "from-blue-500 to-cyan-400" },
-        { title: "Pending Claims", value: "345", icon: FileCheck, change: "-1.2%", up: false, color: "from-amber-500 to-orange-400" },
-        { title: "Premium Collected", value: "$5.2M", icon: Banknote, change: "+3.8%", up: true, color: "from-emerald-500 to-green-400" },
-        { title: "Expiring Soon", value: "120", icon: CalendarClock, change: "Review", up: false, color: "from-rose-500 to-pink-400" },
-    ];
-
-    const recentClaims = [
-        { id: "C-2023-001", customer: "Sarah Johnson", type: "Health Insurance", status: "Approved", amount: "$2,450" },
-        { id: "C-2023-002", customer: "Michael Davis", type: "Health Insurance", status: "Pending", amount: "$1,800" },
-        { id: "C-2023-003", customer: "Emily White", type: "Health Insurance", status: "Rejected", amount: "$3,200" },
-        { id: "C-2023-004", customer: "David Wilson", type: "Health Insurance", status: "Approved", amount: "$950" },
-        { id: "C-2023-005", customer: "Lisa Chen", type: "Health Insurance", status: "Pending", amount: "$4,100" },
+        { title: "Active Policies", value: activePolicies.toLocaleString(), icon: Users, change: "Live", up: true, color: "from-blue-500 to-cyan-400" },
+        { title: "Pending Claims", value: pendingClaims.toString(), icon: FileCheck, change: "Action Needed", up: false, color: "from-amber-500 to-orange-400" },
+        { title: "Premium Coverage", value: `$${(totalPremium / 1000).toFixed(1)}K`, icon: Banknote, change: "Total", up: true, color: "from-emerald-500 to-green-400" },
+        { title: "Expiring Soon", value: expiringSoon.toString(), icon: CalendarClock, change: "30 Days", up: false, color: "from-rose-500 to-pink-400" },
     ];
 
     function getStatusBadge(status: string) {
         const styles: Record<string, string> = {
-            Approved: "bg-emerald-500/15 text-emerald-400 border-emerald-500/20",
-            Pending: "bg-amber-500/15 text-amber-400 border-amber-500/20",
-            Rejected: "bg-red-500/15 text-red-400 border-red-500/20",
+            approved: "bg-emerald-500/15 text-emerald-400 border-emerald-500/20",
+            pending: "bg-amber-500/15 text-amber-400 border-amber-500/20",
+            rejected: "bg-red-500/15 text-red-400 border-red-500/20",
         };
+        const displayStatus = status.charAt(0).toUpperCase() + status.slice(1);
         return (
-            <span className={`px-2.5 py-1 rounded-full text-xs font-semibold border ${styles[status] || "bg-slate-500/15 text-slate-400 border-slate-500/20"}`}>
-                {status}
+            <span className={`px-2.5 py-1 rounded-full text-xs font-semibold border ${styles[status.toLowerCase()] || "bg-slate-500/15 text-slate-400 border-slate-500/20"}`}>
+                {displayStatus}
             </span>
         );
     }
 
     return (
-        <div className="space-y-8 max-w-7xl mx-auto">
+        <>
 
             {/* Hero Welcome */}
             <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-600/20 via-indigo-600/10 to-purple-600/20 border border-white/10 p-8">
@@ -131,24 +133,45 @@ export default async function InsuranceDashboard() {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-white/[0.04]">
-                            {recentClaims.map((claim) => (
-                                <tr key={claim.id} className="hover:bg-white/[0.02] transition-colors">
-                                    <td className="px-6 py-4 font-mono text-sm text-white/80">{claim.id}</td>
-                                    <td className="px-6 py-4 text-white/70">{claim.customer}</td>
-                                    <td className="px-6 py-4 text-white/50">{claim.type}</td>
-                                    <td className="px-6 py-4 font-semibold text-white/80">{claim.amount}</td>
-                                    <td className="px-6 py-4">{getStatusBadge(claim.status)}</td>
-                                    <td className="px-6 py-4 text-right">
-                                        <button className="text-blue-400 hover:text-blue-300 font-medium text-xs transition-colors">
-                                            View Details
-                                        </button>
+                            {claims.length > 0 ? (
+                                claims.map((claim: any) => (
+                                    <tr key={claim.id} className="hover:bg-white/[0.02] transition-colors">
+                                        <td className="px-6 py-4 font-mono text-sm text-white/80 line-clamp-1">{claim.id.slice(0, 8)}...</td>
+                                        <td className="px-6 py-4 text-white/70">{claim.patients?.profiles?.full_name || 'Unknown'}</td>
+                                        <td className="px-6 py-4 text-white/50">{claim.claim_type || 'General'}</td>
+                                        <td className="px-6 py-4 font-semibold text-white/80">${claim.amount ? Number(claim.amount).toFixed(2) : '0.00'}</td>
+                                        <td className="px-6 py-4">{getStatusBadge(claim.status)}</td>
+                                        <td className="px-6 py-4 text-right">
+                                            <Link href={`/insurance/claims/${claim.id}`} className="text-blue-400 hover:text-blue-300 font-medium text-xs transition-colors">
+                                                View Details
+                                            </Link>
+                                        </td>
+                                    </tr>
+                                ))
+                            ) : (
+                                <tr>
+                                    <td colSpan={6} className="px-6 py-12 text-center">
+                                        <div className="flex flex-col items-center gap-3">
+                                            <FileCheck className="h-10 w-10 text-white/10" />
+                                            <p className="text-muted-foreground italic">No recent claims found</p>
+                                            {activePolicies === 0 && (
+                                                <form action={async () => {
+                                                    'use server';
+                                                    await seedSamplePolicies();
+                                                }}>
+                                                    <button type="submit" className="mt-2 px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-xs hover:bg-white/10 transition-all text-white/60">
+                                                        Seed Sample Policies
+                                                    </button>
+                                                </form>
+                                            )}
+                                        </div>
                                     </td>
                                 </tr>
-                            ))}
+                            )}
                         </tbody>
                     </table>
                 </div>
             </div>
-        </div>
+        </>
     );
 }

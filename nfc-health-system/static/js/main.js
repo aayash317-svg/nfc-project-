@@ -86,10 +86,21 @@ document.addEventListener('DOMContentLoaded', () => {
     const addDataForm = document.getElementById('add-data-form');
     if (addDataForm) {
         addDataForm.addEventListener('submit', (e) => {
-            // Get patient ID from hidden field or URL, but the form has it implicitly if we set it up right
-            // The form action needs the patient ID
             const patientId = addDataForm.dataset.patientId;
             handleFormSubmit(e, `/api/patient/${patientId}/add`, '/');
         });
     }
+
+    // Scroll Reveal Logic
+    const revealElements = document.querySelectorAll('.reveal');
+    const revealObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('active');
+                revealObserver.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.1 });
+
+    revealElements.forEach(el => revealObserver.observe(el));
 });

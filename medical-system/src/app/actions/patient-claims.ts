@@ -9,17 +9,31 @@ export async function getPatientClaims() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return { error: "Unauthorized" };
 
-    const { data, error } = await supabase
+    const { data: claims, error } = await supabase
         .from('claims')
-        .select(`
-            *,
-            insurance_providers ( company_name )
-        `)
+        .select('*')
         .eq('patient_id', user.id)
         .order('submitted_at', { ascending: false });
 
     if (error) return { error: error.message };
-    return { claims: data };
+
+    // Attach provider company names manually to avoid missing relationship error
+    const providerIds = Array.from(new Set(claims.map(c => c.provider_id).filter(Boolean)));
+    if (providerIds.length === 0) return { claims };
+
+    const { data: providers } = await supabase
+        .from('insurance_providers')
+        .select('id, company_name')
+        .in('id', providerIds);
+
+    const providerMap = new Map(providers?.map((p: any) => [p.id, p]) || []);
+
+    const claimsWithProviders = claims.map(c => ({
+        ...c,
+        insurance_providers: providerMap.get(c.provider_id) || null
+    }));
+
+    return { claims: claimsWithProviders };
 }
 
 export async function submitClaim(prevState: any, formData: FormData) {
@@ -70,15 +84,28 @@ export async function getPatientPolicies() {
     if (!user) return { error: "Unauthorized" };
 
     // Fetch policies linked to this patient
-    const { data, error } = await supabase
+    const { data: policies, error } = await supabase
         .from('insurance_policies')
-        .select(`
-            *,
-            insurance_providers ( id, company_name )
-        `)
+        .select('*')
         .eq('patient_id', user.id)
         .eq('status', 'active');
 
     if (error) return { error: error.message };
-    return { policies: data };
+
+    const providerIds = Array.from(new Set(policies.map(p => p.provider_id).filter(Boolean)));
+    if (providerIds.length === 0) return { policies };
+
+    const { data: providers } = await supabase
+        .from('insurance_providers')
+        .select('id, company_name')
+        .in('id', providerIds);
+
+    const providerMap = new Map(providers?.map((p: any) => [p.id, p]) || []);
+
+    const policiesWithProviders = policies.map(p => ({
+        ...p,
+        insurance_providers: providerMap.get(p.provider_id) || null
+    }));
+
+    return { policies: policiesWithProviders };
 }

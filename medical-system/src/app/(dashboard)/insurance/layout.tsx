@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+import { HeaderTitle } from "@/components/dashboard/header-title";
 
 export default async function InsuranceLayout({
     children,
@@ -28,7 +29,7 @@ export default async function InsuranceLayout({
 
     const { data: profile } = await supabase
         .from('profiles')
-        .select('full_name')
+        .select('full_name, role')
         .eq('id', user.id)
         .single();
 
@@ -82,7 +83,7 @@ export default async function InsuranceLayout({
                 <header className="h-16 bg-[#0d1221]/80 backdrop-blur-xl border-b border-white/[0.06] flex items-center justify-between px-6 z-10">
                     <div className="flex items-center gap-3">
                         <div className="h-2 w-2 bg-blue-500 rounded-full" />
-                        <h2 className="text-base font-semibold text-white/80">Insurance Portal</h2>
+                        <HeaderTitle role={profile?.role} />
                     </div>
 
                     <div className="flex items-center gap-3">
@@ -112,7 +113,7 @@ export default async function InsuranceLayout({
                 </header>
 
                 {/* Page Content */}
-                <main className="flex-1 overflow-y-auto bg-[#0a0e1a] p-6">
+                <main className="flex-1 overflow-y-auto bg-[#0a0e1a] p-6 space-y-8">
                     {children}
                 </main>
             </div>
