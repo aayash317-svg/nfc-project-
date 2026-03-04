@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import { Activity, Calendar, FileText, ShieldCheck, User, Phone, AlertTriangle, FileDown, ArrowRight } from "lucide-react";
+import { Activity, Calendar, FileText, ShieldCheck, User, Phone, AlertTriangle, FileDown, ArrowRight, ChevronRight } from "lucide-react";
 import { redirect } from "next/navigation";
 import { PatientIdentityCard } from "@/components/PatientIdentityCard";
 
@@ -48,30 +48,27 @@ export default async function PatientDashboard() {
         .single();
 
     return (
-        <div className="space-y-10 pb-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
-            {/* Welcome Hero Section */}
-            <div className="relative overflow-hidden rounded-3xl bg-slate-900/50 border border-white/5 p-8 md:p-12">
-                <div className="absolute top-0 right-0 w-64 h-64 bg-primary/20 blur-3xl rounded-full -mr-20 -mt-20 animate-pulse" />
-                <div className="absolute bottom-0 left-0 w-64 h-64 bg-secondary/10 blur-3xl rounded-full -ml-20 -mb-20" />
-
-                <div className="relative z-10 flex flex-col md:flex-row gap-8 items-center justify-between">
-                    <div className="space-y-4 text-center md:text-left">
-                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs font-bold uppercase tracking-widest text-primary">
-                            <Activity className="h-3 w-3" />
-                            Live Health Pulse
+        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4">
+            {/* Unified Hero Section */}
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-600/20 via-indigo-600/10 to-purple-600/20 border border-white/10 p-8">
+                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-blue-500/10 via-transparent to-transparent" />
+                <div className="relative flex flex-col md:flex-row gap-6 items-center justify-between">
+                    <div>
+                        <div className="flex items-center gap-2 mb-2">
+                            <div className="h-2 w-2 bg-emerald-400 rounded-full animate-pulse" />
+                            <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest">Health Identity Active</span>
                         </div>
-                        <h1 className="text-4xl md:text-6xl font-black tracking-tight text-white leading-tight">
-                            Welcome back,<br />
-                            <span className="text-gradient">{profile?.full_name?.split(' ')[0] || 'Patient'}</span>
+                        <h1 className="text-3xl font-bold text-white">
+                            Welcome back, {profile?.full_name?.split(' ')[0] || 'Patient'}
                         </h1>
-                        <p className="text-lg text-white/50 max-w-md">
-                            Your comprehensive health identity and medical summary are synced and ready.
+                        <p className="text-blue-100/60 mt-1 max-w-md text-sm">
+                            Your universal health records and insurance status are synchronized.
                         </p>
                     </div>
 
-                    {/* NFC / QR Identity Card (Client Component) */}
+                    {/* Integrated Identity Card (Smaller Scale) */}
                     {patient?.nfc_tag_id && patient?.qr_code_token && (
-                        <div className="w-full max-w-sm transform hover:scale-[1.02] transition-transform duration-500">
+                        <div className="w-full max-w-xs scale-90 md:scale-100">
                             <PatientIdentityCard
                                 nfcTagId={patient.nfc_tag_id}
                                 qrCodeToken={patient.qr_code_token}
@@ -82,141 +79,130 @@ export default async function PatientDashboard() {
                 </div>
             </div>
 
-            {/* Quick Stats Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {/* Consistent Stats Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
                 <StatCard
                     title="Blood Group"
                     value={patient?.blood_group || "N/A"}
-                    icon={<Activity className="h-6 w-6" />}
-                    color="text-rose-500"
-                    bgColor="bg-rose-500/10"
+                    icon={<Activity className="h-5 w-5" />}
+                    color="from-rose-500 to-pink-500"
                     subtext="Verified System"
                 />
                 <StatCard
-                    title="Age / DOB"
+                    title="Date of Birth"
                     value={patient?.dob ? new Date(patient.dob).toLocaleDateString() : "N/A"}
-                    icon={<Calendar className="h-6 w-6" />}
-                    color="text-blue-500"
-                    bgColor="bg-blue-500/10"
-                    subtext="Universal Record"
+                    icon={<Calendar className="h-5 w-5" />}
+                    color="from-blue-500 to-cyan-400"
+                    subtext="Profile Birthdate"
                 />
                 <StatCard
-                    title="Insurance Status"
+                    title="Insurance Policy"
                     value={policy ? "Active" : "None"}
-                    icon={<ShieldCheck className="h-6 w-6" />}
-                    color="text-emerald-500"
-                    bgColor="bg-emerald-500/10"
+                    icon={<ShieldCheck className="h-5 w-5" />}
+                    color="from-emerald-500 to-green-400"
                     subtext={policy?.policy_number || "No Active Policy"}
                 />
                 <StatCard
-                    title="Cloud Records"
+                    title="Medical Records"
                     value={records?.length?.toString() || "0"}
-                    icon={<FileText className="h-6 w-6" />}
-                    color="text-cyan-500"
-                    bgColor="bg-cyan-500/10"
-                    subtext="Encrypted Storage"
+                    icon={<FileText className="h-5 w-5" />}
+                    color="from-purple-500 to-indigo-400"
+                    subtext="Secured on Cloud"
                 />
             </div>
 
-            {/* Content Sections */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-                {/* Recent Medical History */}
-                <div className="lg:col-span-2 space-y-6">
-                    <div className="flex items-center justify-between">
-                        <h3 className="text-xl font-bold text-white flex items-center gap-3">
-                            <HistoryIcon className="h-6 w-6 text-primary" />
-                            Recent Medical Activity
-                        </h3>
-                        <button className="text-sm font-bold text-primary hover:text-primary/80 transition-colors px-4 py-2 rounded-xl bg-primary/5 border border-primary/10">
-                            View Roadmap
-                        </button>
-                    </div>
-
-                    <div className="glass overflow-hidden border-white/5 bg-slate-900/40 shadow-2xl">
-                        {!records || records.length === 0 ? (
-                            <div className="p-16 text-center space-y-4">
-                                <div className="inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-white/5 border border-white/10 mb-4">
-                                    <FileText className="h-8 w-8 text-white/20" />
+            {/* Layout Grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                {/* Recent Activity List */}
+                <div className="lg:col-span-2 space-y-5">
+                    <div className="rounded-2xl bg-white/[0.03] border border-white/[0.06] overflow-hidden shadow-xl">
+                        <div className="p-5 flex items-center justify-between border-b border-white/[0.06] bg-white/[0.02]">
+                            <div className="flex items-center gap-3">
+                                <div className="p-2 bg-blue-500/15 rounded-lg">
+                                    <HistoryIcon className="h-4 w-4 text-blue-400" />
                                 </div>
-                                <h4 className="text-lg font-bold text-white/40">No records found</h4>
-                                <p className="text-sm text-white/20 max-w-xs mx-auto text-balance">Your medical history will appear here once scans or reports are uploaded.</p>
+                                <h3 className="text-base font-bold text-white">Recent Medical Activity</h3>
+                            </div>
+                            <button className="text-xs font-bold text-blue-400 hover:text-blue-300 transition-all flex items-center gap-1">
+                                View History <ArrowRight className="h-3 w-3" />
+                            </button>
+                        </div>
+
+                        {!records || records.length === 0 ? (
+                            <div className="p-12 text-center text-white/20 italic text-sm">
+                                No recent medical records found.
                             </div>
                         ) : (
-                            <div className="divide-y divide-white/5">
+                            <div className="divide-y divide-white/[0.04]">
                                 {records.map((rec: any) => (
-                                    <div key={rec.id} className="p-6 flex items-center justify-between hover:bg-white/[0.04] transition-all cursor-pointer group">
-                                        <div className="flex items-center gap-5">
-                                            <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center text-primary font-black text-xs shadow-inner border border-white/5">
+                                    <div key={rec.id} className="p-4 flex items-center justify-between hover:bg-white/[0.02] transition-all cursor-pointer group">
+                                        <div className="flex items-center gap-4">
+                                            <div className="h-10 w-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-blue-400 font-bold text-[10px] tracking-tighter">
                                                 {rec.record_type?.substring(0, 3).toUpperCase() || 'REC'}
                                             </div>
                                             <div>
-                                                <h4 className="text-lg font-bold text-white group-hover:text-primary transition-colors">
+                                                <h4 className="text-sm font-bold text-white group-hover:text-blue-400 transition-colors">
                                                     {rec.title}
                                                 </h4>
-                                                <div className="flex items-center gap-3 mt-1">
-                                                    <span className="text-xs font-bold text-white/30 uppercase tracking-tighter">
-                                                        {new Date(rec.created_at).toLocaleDateString()}
-                                                    </span>
-                                                    <span className="h-1 w-1 rounded-full bg-white/10" />
-                                                    <span className="text-xs text-white/20">Authorized Scan</span>
-                                                </div>
+                                                <p className="text-[10px] text-white/30 uppercase tracking-widest font-medium">
+                                                    {new Date(rec.created_at).toLocaleDateString()}
+                                                </p>
                                             </div>
                                         </div>
-                                        <ArrowRight className="h-5 w-5 text-white/10 group-hover:text-primary group-hover:translate-x-1 transition-all" />
+                                        <span className="px-2.5 py-1 rounded-full text-[10px] font-bold border border-white/10 bg-white/5 text-white/50 group-hover:border-blue-500/30 group-hover:text-blue-400 transition-all uppercase tracking-widest">
+                                            Details
+                                        </span>
                                     </div>
                                 ))}
                             </div>
                         )}
+                        <div className="p-3 text-center bg-white/[0.02] border-t border-white/[0.04]">
+                            <button className="text-[10px] font-black text-white/30 hover:text-white/60 uppercase tracking-[0.2em] transition-colors">
+                                Secure Encrypted Roadmap
+                            </button>
+                        </div>
                     </div>
                 </div>
 
-                {/* Emergency Protocols Card */}
+                {/* Emergency & Quick Access */}
                 <div className="space-y-6">
-                    <h3 className="text-xl font-bold text-white flex items-center gap-3">
-                        <ShieldCheck className="h-6 w-6 text-rose-500" />
-                        Emergency Shield
-                    </h3>
-
-                    <div className="glass p-8 space-y-8 border-rose-500/10 bg-rose-500/[0.02]">
-                        <div className="space-y-6">
-                            <div className="p-4 bg-white/5 rounded-2xl border border-white/5">
-                                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30 mb-2">Primary Contact</p>
-                                <div className="space-y-1">
-                                    <p className="text-xl font-bold text-white">{patient?.emergency_contact?.name || "Not Set"}</p>
-                                    <p className="text-sm font-medium text-white/50 flex items-center gap-2">
-                                        <Phone className="h-3 w-3" />
-                                        {patient?.emergency_contact?.phone || "No phone provided"}
-                                    </p>
-                                </div>
+                    <div className="rounded-2xl bg-white/[0.03] border border-white/[0.06] p-6 space-y-6">
+                        <div className="flex items-center gap-3">
+                            <div className="p-2 bg-rose-500/15 rounded-lg">
+                                <ShieldCheck className="h-4 w-4 text-rose-400" />
                             </div>
-
-                            <div className="space-y-4">
-                                <div className="flex items-center justify-between text-sm">
-                                    <span className="text-white/30">Auto-Alert System</span>
-                                    <span className="text-emerald-400 font-bold uppercase text-[10px] tracking-widest px-2 py-0.5 bg-emerald-400/10 rounded-md">Online</span>
-                                </div>
-                                <div className="flex items-center justify-between text-sm">
-                                    <span className="text-white/30">NFC Priority</span>
-                                    <span className="text-emerald-400 font-bold uppercase text-[10px] tracking-widest px-2 py-0.5 bg-emerald-400/10 rounded-md">Critical</span>
-                                </div>
-                            </div>
+                            <h3 className="text-base font-bold text-white tracking-tight">Emergency Data</h3>
                         </div>
 
-                        <button className="w-full py-4 bg-rose-600 hover:bg-rose-500 text-white rounded-2xl font-black text-sm transition-all shadow-xl shadow-rose-600/20 active:scale-95 flex items-center justify-center gap-3">
-                            <AlertTriangle className="h-5 w-5 animate-pulse" />
-                            EMERGENCY SOS MODE
-                        </button>
+                        <div className="space-y-4">
+                            <div className="p-4 bg-white/[0.03] rounded-xl border border-white/5">
+                                <p className="text-[10px] font-bold text-white/30 uppercase tracking-widest mb-1.5">Primary Contact</p>
+                                <p className="text-base font-bold text-white">{patient?.emergency_contact?.name || "Not Configured"}</p>
+                                <div className="flex items-center gap-2 mt-1 text-xs text-white/50 font-medium">
+                                    <Phone className="h-3 w-3" />
+                                    {patient?.emergency_contact?.phone || "No phone linked"}
+                                </div>
+                            </div>
+
+                            <button className="w-full py-4 bg-rose-600/20 hover:bg-rose-600/30 text-rose-400 border border-rose-500/20 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2.5 group">
+                                <AlertTriangle className="h-4 w-4 group-hover:scale-110 transition-transform" />
+                                EMERGENCY SOS MODE
+                            </button>
+                        </div>
                     </div>
 
-                    {/* Quick Access Card */}
-                    <div className="glass p-6 bg-blue-600/10 border-blue-600/20 group hover:bg-blue-600/20 transition-all cursor-pointer">
-                        <div className="flex items-center justify-between">
-                            <div className="space-y-1">
-                                <p className="text-xs font-bold text-blue-400 uppercase tracking-widest">Medical Wallet</p>
-                                <h4 className="font-bold text-white">Download Identity</h4>
+                    {/* Quick Link */}
+                    <div className="flex items-center justify-between p-5 rounded-2xl bg-blue-600/10 border border-blue-500/20 group hover:bg-blue-600/20 transition-all cursor-pointer">
+                        <div className="flex items-center gap-4">
+                            <div className="p-2 bg-blue-500/20 rounded-lg text-blue-400">
+                                <FileDown className="h-5 w-5" />
                             </div>
-                            <FileDown className="h-6 w-6 text-white/20 group-hover:text-blue-400 transition-colors" />
+                            <div>
+                                <h4 className="text-sm font-bold text-white">Medical ID Card</h4>
+                                <p className="text-xs text-blue-400/50">Save to device</p>
+                            </div>
                         </div>
+                        <ChevronRight className="h-5 w-5 text-white/20 group-hover:text-blue-400 transition-all group-hover:translate-x-1" />
                     </div>
                 </div>
             </div>
@@ -224,27 +210,27 @@ export default async function PatientDashboard() {
     );
 }
 
-function StatCard({ title, value, icon, subtext, color, bgColor }: {
+function StatCard({ title, value, icon, subtext, color }: {
     title: string,
     value: string,
     icon: React.ReactNode,
     subtext: string,
-    color: string,
-    bgColor: string
+    color: string
 }) {
     return (
-        <div className="glass p-6 group hover:translate-y-[-4px] transition-all duration-300 bg-slate-900/40 border-white/5 shadow-xl">
-            <div className="flex items-center justify-between mb-6">
-                <div className={`p-3 rounded-2xl ${bgColor} ${color} group-hover:scale-110 transition-transform duration-500`}>
-                    {icon}
+        <div className="group relative overflow-hidden rounded-2xl bg-white/[0.03] border border-white/[0.06] p-6 hover:bg-white/[0.06] hover:border-white/10 transition-all duration-300">
+            <div className={`absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r ${color} opacity-60 group-hover:opacity-100 transition-opacity`} />
+
+            <div className="flex items-start justify-between mb-4">
+                <div className="p-2.5 rounded-xl bg-white/5 border border-white/10 group-hover:border-white/20 transition-colors">
+                    <span className="text-white/70">{icon}</span>
                 </div>
-                <div className="w-2 h-2 rounded-full bg-white/10 group-hover:bg-primary transition-colors" />
+                <div className="h-1.5 w-1.5 rounded-full bg-white/10 group-hover:bg-blue-400 transition-colors" />
             </div>
-            <div className="space-y-1">
-                <p className="text-xs font-bold text-white/40 uppercase tracking-widest leading-none">{title}</p>
-                <h3 className="text-2xl font-black text-white tracking-tight truncate">{value}</h3>
-                <p className="text-[10px] font-bold text-white/20 uppercase tracking-tighter">{subtext}</p>
-            </div>
+
+            <p className="text-[10px] font-bold text-white/40 uppercase tracking-[0.1em] mb-1">{title}</p>
+            <h3 className="text-2xl font-bold text-white tracking-tight truncate">{value}</h3>
+            <p className="text-[10px] font-medium text-white/20 mt-1">{subtext}</p>
         </div>
     )
 }
