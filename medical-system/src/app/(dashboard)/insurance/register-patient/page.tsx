@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { registerPatient } from '@/app/actions/register-patient';
 import { QRCodeGenerator } from '@/components/QRCodeGenerator';
+import { PatientIdentityCard } from '@/components/PatientIdentityCard';
 import { Loader2, UserPlus, Activity, Save, CheckCircle, Copy, Check } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
@@ -205,13 +206,15 @@ export default function RegisterPatientPage() {
                         </div>
                     </div>
 
-                    {/* QR Code */}
-                    <div className="flex flex-col items-center gap-4 bg-black/20 p-8 rounded-2xl border border-white/5 max-w-sm mx-auto">
-                        <div className="text-sm font-mono text-muted-foreground uppercase tracking-widest">Health Identity QR</div>
-                        {result && <QRCodeGenerator value={result.qr_code_token} size={180} />}
-                        <p className="text-xs text-muted-foreground text-center">
-                            Patient can scan this QR at any hospital node to access their records.
-                        </p>
+                    {/* QR Code & Identity Card */}
+                    <div className="max-w-lg mx-auto w-full">
+                        {result && (
+                            <PatientIdentityCard
+                                nfcTagId={result.nfc_tag_id}
+                                qrCodeToken={result.qr_code_token}
+                                patientId={result.id}
+                            />
+                        )}
                     </div>
 
                     {/* Actions */}
