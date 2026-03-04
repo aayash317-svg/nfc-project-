@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { Activity, Calendar, FileText, ShieldCheck, User, Phone, AlertTriangle, FileDown, ArrowRight, ChevronRight } from "lucide-react";
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { PatientIdentityCard } from "@/components/PatientIdentityCard";
 
 export default async function PatientDashboard() {
