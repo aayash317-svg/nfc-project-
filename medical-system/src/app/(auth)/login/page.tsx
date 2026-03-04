@@ -72,7 +72,12 @@ export default function UnifiedLogin() {
         });
 
         if (authError) {
-            setError(authError.message);
+            if (authError.message === 'Failed to fetch') {
+                setError("Connection Error: Could not connect to the security server. Please check your internet or configuration.");
+                console.error("Supabase Connection Error. Check NEXT_PUBLIC_SUPABASE_URL in .env.local:", process.env.NEXT_PUBLIC_SUPABASE_URL);
+            } else {
+                setError(authError.message);
+            }
             setLoading(false);
         } else {
             // Redirect based on role — middleware will handle the actual routing
@@ -136,7 +141,7 @@ export default function UnifiedLogin() {
 
                     <form onSubmit={handleLogin} className="space-y-5">
                         <div className="space-y-2">
-                            <label className="text-sm font-medium text-muted-foreground ml-1" htmlFor="email">Email</label>
+                            <label className="text-sm font-medium text-muted-foreground ml-1" htmlFor="email">Email Address</label>
                             <div className="relative group">
                                 <User className={`absolute left-3 top-3 h-5 w-5 text-muted-foreground group-focus-within:${colors.text} transition-colors`} />
                                 <input
@@ -149,6 +154,9 @@ export default function UnifiedLogin() {
                                     required
                                 />
                             </div>
+                            <p className="text-[10px] text-muted-foreground mt-1 ml-1 px-1">
+                                Use the email address you registered with on the portal.
+                            </p>
                         </div>
 
                         <div className="space-y-2">
