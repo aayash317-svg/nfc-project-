@@ -4,6 +4,7 @@ import { createPolicy } from "@/app/actions/insurance-policies";
 import { useFormStatus } from "react-dom";
 import { useActionState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { ArrowLeft, Save, Loader2, Mail } from "lucide-react";
 
 // Submit Button Component for pending state
@@ -36,6 +37,8 @@ const initialState = {
 };
 
 export default function CreatePolicyForm() {
+    const searchParams = useSearchParams();
+    const defaultEmail = searchParams.get('email') || '';
     const [state, formAction] = useActionState(createPolicy, initialState);
 
     return (
@@ -71,6 +74,7 @@ export default function CreatePolicyForm() {
                                     type="email"
                                     name="patientEmail"
                                     required
+                                    defaultValue={defaultEmail}
                                     placeholder="patient@example.com"
                                     className="w-full h-14 pl-12 pr-4 rounded-2xl bg-black/40 border border-white/10 text-white placeholder:text-white/20 focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500/40 transition-all outline-none font-medium"
                                 />

@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { registerPatient } from '@/app/actions/register-patient';
 import { QRCodeGenerator } from '@/components/QRCodeGenerator';
 import { PatientIdentityCard } from '@/components/PatientIdentityCard';
-import { Loader2, UserPlus, Activity, Save, CheckCircle, Copy, Check } from 'lucide-react';
+import { Loader2, UserPlus, Activity, Save, CheckCircle, Copy, Check, FileCheck } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 export default function RegisterPatientPage() {
@@ -229,6 +229,13 @@ export default function RegisterPatientPage() {
                         >
                             <UserPlus className="h-4 w-4" />
                             Register Another
+                        </button>
+                        <button
+                            onClick={() => router.push(`/insurance/policies/new?email=${result?.email}`)}
+                            className="flex-1 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-bold transition-all shadow-lg shadow-blue-600/20 flex items-center justify-center gap-2"
+                        >
+                            <FileCheck className="h-4 w-4" />
+                            Issue Insurance Policy
                         </button>
                         <button
                             onClick={() => router.push('/insurance')}
