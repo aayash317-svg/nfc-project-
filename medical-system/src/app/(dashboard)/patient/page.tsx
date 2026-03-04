@@ -18,7 +18,7 @@ export default async function PatientDashboard() {
         .from('patients')
         .select(`
       *,
-      profiles!id (
+      profiles:profiles!patients_id_fkey (
         full_name,
         email
       )
